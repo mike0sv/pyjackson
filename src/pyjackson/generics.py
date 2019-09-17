@@ -168,7 +168,7 @@ def _transform_to_class_methods(cls):
 
 
 class Serializer(metaclass=_SerializerMeta):
-    real_type: Type = None
+    real_type = None  # type: Type
 
     def __init__(self):
         pass

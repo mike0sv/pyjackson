@@ -7,7 +7,7 @@ import pytest
 from pyjackson import deserialize
 from pyjackson.comparable import Comparable
 from pyjackson.generics import Serializer, StaticSerializer
-from pyjackson.serialize import SerializationError, serialize
+from pyjackson.serialization import SerializationError, serialize
 from pyjackson.utils import make_string
 from tests.conftest import serde_and_compare
 

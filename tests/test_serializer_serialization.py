@@ -2,7 +2,7 @@ import sys
 
 from pyjackson import serialize
 from pyjackson.comparable import Comparable
-from pyjackson.deserialize import deserialize
+from pyjackson.deserialization import deserialize
 from pyjackson.generics import Serializer
 from pyjackson.utils import make_string, type_field
 

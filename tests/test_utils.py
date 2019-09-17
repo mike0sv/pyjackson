@@ -1,7 +1,23 @@
 from typing import Coroutine, Dict, List, Set, Tuple, Union
 
 from pyjackson.utils import (cached_property, get_collection_internal_type, get_mapping_types, is_collection,
-                             is_generic, is_mapping, is_union, union_args)
+                             is_generic, is_mapping, is_union, make_string, union_args)
+
+# __all__ = ['type_field', 'resolve_sequence_type', 'is_aslist',
+#            'type_field_position_is', 'union_args', 'get_collection_internal_type', 'get_mapping_types',
+#            'get_class_fields', 'as_list', 'get_function_fields', 'argspec_to_fields', 'get_collection_type',
+#            'get_function_signature', 'get_subtype_alias', 'get_type_field_name', 'has_hierarchy', 'resolve_subtype',
+#            'is_generic', 'issubclass_safe', 'is_hierarchy_root', 'turn_args_to_kwargs', 'flat_dict_repr',
+#            'has_subtype_alias', 'is_serializable', 'is_descriptor', 'cached_property']
+
+
+def test_make_string():
+    @make_string
+    class AClass:
+        def __init__(self, field):
+            self.field = field
+
+    assert str(AClass('value')) == 'AClass(field=value)'
 
 
 def test_is_mapping():

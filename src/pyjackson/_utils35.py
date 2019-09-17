@@ -6,7 +6,7 @@ def is_generic35(as_class: typing.Type):
 
 
 def is_collection35(as_class):
-    return issubclass(as_class, typing.Collection)
+    return issubclass(as_class, (typing.List, typing.Set, typing.Tuple))
 
 
 def resolve_sequence_type35(type_hint, f):
@@ -20,7 +20,10 @@ def resolve_sequence_type35(type_hint, f):
 
 
 def is_union35(cls):
-    return isinstance(cls, typing.UnionMeta)
+    try:
+        return isinstance(cls, typing.UnionMeta)
+    except AttributeError:
+        return isinstance(cls, typing._UnionMeta)
 
 
 def is_mapping35(as_class):

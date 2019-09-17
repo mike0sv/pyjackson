@@ -13,15 +13,14 @@ if _major != 3 or _minor < 5:
 
 if _minor < 7:
     from ._utils35 import (resolve_sequence_type35 as resolve_sequence_type,
-                           is_collection35 as is_collection,
                            is_generic35 as is_generic,
                            is_mapping35 as is_mapping,
                            get_collection_type35 as get_collection_type)
 
-    if _minor == 6:
-        from ._utils36 import is_union36 as is_union
+    if _minor == 5:
+        from ._utils35 import is_union35 as is_union, is_collection35 as is_collection
     else:
-        from ._utils35 import is_union35 as is_union
+        from ._utils36 import is_union36 as is_union, is_collection36 as is_collection
 
 elif _minor == 7:
     from ._utils37 import (resolve_sequence_type37 as resolve_sequence_type,
@@ -69,7 +68,7 @@ def make_string(*fields: str, include_name=True):
 
     def make_str(cls):
         def __str__(self):
-            flds = fields or [f.name for f in get_class_fields(cls)]
+            flds = fields or [f.name for f in get_function_fields(cls.__init__, False)]
             args = ','.join('{}={}'.format(key, getattr(self, key)) for key in flds)
             args_str = str(args)
             if include_name:
