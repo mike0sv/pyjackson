@@ -1,5 +1,30 @@
+import os
+
+import pytest
+
 import pyjackson
+from pyjackson.decorators import make_string
 from pyjackson.generics import Serializer
+from pyjackson.utils import Comparable
+
+
+@pytest.fixture
+def type_factory():
+    def inner(class_name, field_type, base=Comparable):
+        @make_string
+        class FooType(base):
+            def __init__(self, field: field_type):
+                self.field = field
+
+        FooType.__name__ = class_name
+        return FooType
+
+    return inner
+
+
+@pytest.fixture
+def tmp_file(tmpdir):
+    return os.path.join(tmpdir, 'file.txt')
 
 
 def serde_and_compare(obj, obj_type=None, true_payload=None, check_payload=True):

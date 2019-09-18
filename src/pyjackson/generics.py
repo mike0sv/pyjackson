@@ -2,7 +2,7 @@ import inspect
 import sys
 from abc import abstractmethod
 from functools import lru_cache, wraps
-from typing import Hashable, Type
+from typing import Hashable, Type, Union
 
 from pyjackson.utils import flat_dict_repr, is_descriptor, turn_args_to_kwargs
 
@@ -11,22 +11,19 @@ SERIALIZER_MAPPING = dict()
 _pv_major, _pv_minor = sys.version_info[:2]
 
 
-def register_serializer(cls, real_type=None):
+def _register_serializer(cls, real_type):
+    """Register cls as serializer for real_type"""
     if real_type is not None:
         if isinstance(real_type, Hashable) and real_type != list and real_type != dict:
             SERIALIZER_MAPPING[real_type] = cls
 
 
-def real_types(*types):
-    def dec(cls):
-        for t in types:
-            register_serializer(cls, t)
-        return cls
-
-    return dec
-
-
 class _SerializerMetaMeta(type):
+    """Metaclass for :class:`_SerializerMeta`
+
+    Mostly needed to support correct isinstance, issubclass and == behaviour in some cases
+    """
+
     def __eq__(self, other):
         if issubclass(other, self) and other._is_dynamic:
             return True
@@ -47,6 +44,12 @@ class _SerializerMetaMeta(type):
 
 
 class _SerializerMeta(type, metaclass=_SerializerMetaMeta):
+    """
+    Metaclass for :class:`Serializer`
+
+    Adds serializer's real_type as it's base class and implements custom type and comparison logic.
+    It is needed to support correct isinstance, issubclass and == behaviour in some cases.
+    """
 
     def __new__(mcs, name, bases, namespace):
         real_type = namespace.get('real_type')
@@ -168,6 +171,10 @@ def _transform_to_class_methods(cls):
 
 
 class Serializer(metaclass=_SerializerMeta):
+    """
+    A base for defining custom serializers.
+    # TODO definitely more docs here
+    """
     real_type = None  # type: Type
 
     def __init__(self):
@@ -200,7 +207,7 @@ class Serializer(metaclass=_SerializerMeta):
 
     def __init_subclass__(cls, **kwargs):
         super(Serializer, cls).__init_subclass__(**kwargs)
-        register_serializer(cls, cls.real_type)
+        _register_serializer(cls, cls.real_type)
 
     def __eq__(self, other):
         if isinstance(other, _SerializerMeta):
@@ -217,6 +224,10 @@ class Serializer(metaclass=_SerializerMeta):
 
 
 class StaticSerializer(Serializer):
+    """
+    An easier way to define a serializer if it has no 'generic' arguments.
+    """
+
     @classmethod
     @abstractmethod
     def deserialize(cls, obj: dict) -> object:
@@ -226,3 +237,6 @@ class StaticSerializer(Serializer):
     @abstractmethod
     def serialize(cls, instance: object) -> dict:
         pass
+
+
+SerializerType = Union[Type, Serializer]

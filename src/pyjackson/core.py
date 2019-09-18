@@ -1,3 +1,5 @@
+import inspect
+import typing
 from enum import Enum
 
 CLASS_SPECS_CACHE = dict()
@@ -11,17 +13,47 @@ BUILTIN_TYPES = {
 
 
 class Position(Enum):
+    """Enum to change field with type information position
+    """
     INSIDE = 0
     OUTSIDE = 1
 
 
-class PyjacksonError(Exception):
-    def __init__(self, msg):
-        self.msg = msg
+class Unserializable:
+    """Mixin type to signal that type is not serializable.
+     :func:`pyjackson.serialize` will throw explicit error if called with instance of Unserializable
+     (or object with nested Unserializable)"""
+    pass
+
+
+class Comparable:
+    def __eq__(self, other):
+        cls = type(self)
+        if cls != type(other):
+            return False
+
+        args = inspect.getfullargspec(cls.__init__).args[1:]
+        for a in args:
+            if getattr(self, a) != getattr(other, a):
+                return False
+        return True
+
+
+class Field(Comparable):
+    def __init__(self, name, type, has_default, default=None):
+        self.name = name
+        self.type = type
+        self.has_default = has_default
+        self.default = default
 
     def __str__(self):
-        return '{}'.format(self.msg)
+        if self.has_default:
+            return f'{self.name}: {self.type.__name__} = {self.default}'
+        return f'{self.name}: {self.type.__name__}'
+
+    def __repr__(self):
+        return str(self)
 
 
-class Unserializable:
-    pass
+ArgList = typing.List[Field]
+Signature = typing.NamedTuple('Signature', [('args', ArgList), ('output', Field)])

@@ -1,15 +1,11 @@
-from typing import Hashable, Type, Union
+from typing import Hashable, Type
 
-from pyjackson.core import BUILTIN_TYPES, Position, PyjacksonError
-from pyjackson.generics import SERIALIZER_MAPPING, Serializer, StaticSerializer
-from pyjackson.utils import (Field, get_class_fields, get_collection_internal_type, get_collection_type,
-                             get_mapping_types, has_subtype_alias, is_aslist, is_collection, is_generic,
-                             is_hierarchy_root, is_mapping, is_union, resolve_subtype, type_field_position_is,
-                             union_args)
-
-
-class DeserializationError(PyjacksonError):
-    pass
+from pyjackson.core import BUILTIN_TYPES, Field, Position
+from pyjackson.errors import DeserializationError
+from pyjackson.generics import SERIALIZER_MAPPING, Serializer, SerializerType, StaticSerializer
+from pyjackson.utils import (get_class_fields, get_collection_internal_type, get_collection_type, get_mapping_types,
+                             has_subtype_alias, is_aslist, is_collection, is_generic, is_hierarchy_root, is_mapping,
+                             is_union, resolve_subtype, type_field_position_is, union_args)
 
 
 def _get_field_type(field: Field, obj):
@@ -76,8 +72,14 @@ def _construct_object(obj, as_class: Type):
     return _construct_from(obj, as_class)
 
 
-def deserialize(obj, as_class: Union[Type, Serializer]):
-    """Convert python dict into given class"""
+def deserialize(obj, as_class: SerializerType):
+    """Convert python dict into given class
+
+    :param obj: dict (or list or any primitive) to deserialize
+    :param as_class: type or serializer
+
+    :return deserialized instance of as_class (or real_type of serializer)
+    """
     if is_generic(as_class):
         if is_mapping(as_class):
             key_type, value_type = get_mapping_types(as_class)

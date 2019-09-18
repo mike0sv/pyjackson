@@ -1,55 +1,96 @@
-from typing import Coroutine, Dict, List, Set, Tuple, Union
+from typing import Dict, List, Union
 
-from pyjackson.utils import (cached_property, get_collection_internal_type, get_mapping_types, is_collection,
-                             is_generic, is_mapping, is_union, make_string, union_args)
+import pytest
 
-# __all__ = ['type_field', 'resolve_sequence_type', 'is_aslist',
-#            'type_field_position_is', 'union_args', 'get_collection_internal_type', 'get_mapping_types',
-#            'get_class_fields', 'as_list', 'get_function_fields', 'argspec_to_fields', 'get_collection_type',
-#            'get_function_signature', 'get_subtype_alias', 'get_type_field_name', 'has_hierarchy', 'resolve_subtype',
-#            'is_generic', 'issubclass_safe', 'is_hierarchy_root', 'turn_args_to_kwargs', 'flat_dict_repr',
-#            'has_subtype_alias', 'is_serializable', 'is_descriptor', 'cached_property']
+from pyjackson.core import Field, Position, Unserializable
+from pyjackson.decorators import as_list, type_field
+from pyjackson.errors import PyjacksonError
+from pyjackson.utils import (Comparable, flat_dict_repr, get_class_field_names, get_class_fields,
+                             get_collection_internal_type, get_function_fields, get_function_signature,
+                             get_mapping_types, get_subtype_alias, get_type_field_name, has_hierarchy,
+                             has_subtype_alias, is_aslist, is_descriptor, is_hierarchy_root, is_serializable,
+                             issubclass_safe, resolve_subtype, turn_args_to_kwargs, type_field_position_is, union_args)
 
 
-def test_make_string():
-    @make_string
+def test_flat_dict_repr():
+    def func(a, b): pass
+
+    d = {'b': 2, 'a': 1}
+    repr = flat_dict_repr(d, None, ', ', False)
+    assert repr == 'a=1, b=2' or repr == 'b=2, a=1'
+    assert flat_dict_repr(d, func, '; ', True) == '{a=1; b=2}'
+
+
+def test_is_aslist():
+    @as_list
+    class AsList:
+        pass
+
+    assert is_aslist(AsList)
+
+    class NotAsList:
+        pass
+
+    assert not is_aslist(NotAsList)
+
+
+def test_get_function_fields():
+    def func1(a: int, b: str = 'bbb'): pass
+
+    fields1 = get_function_fields(func1)
+    assert fields1 == [Field('a', int, False), Field('b', str, True, 'bbb')]
+
+    def func2(a, b='bbb'): pass
+
+    with pytest.raises(PyjacksonError):
+        get_function_fields(func2, True)
+
+    fields2 = get_function_fields(func2, False)
+
+    assert fields2 == [Field('a', None, False), Field('b', None, True, 'bbb')]
+
+
+def test_get_type_field_name():
+    @type_field('aaaa')
+    class Parent:
+        pass
+
+    class Child(Parent):
+        pass
+
+    assert get_type_field_name(Parent) == 'aaaa'
+    assert get_type_field_name(Child) == 'aaaa'
+
+
+def test_get_subtype_alias():
+    @type_field('aaaa')
+    class Parent:
+        aaaa = 'parent'
+
+    @as_list
+    @type_field('aaaa')
+    class AsListParent:
+        pass
+
+    assert get_subtype_alias(Parent, {'aaaa': 'parent'}) == 'parent'
+    assert get_subtype_alias(AsListParent, ['parent']) == 'parent'
+
+
+def test_get_function_signature():
+    def func(arg: str) -> int: pass
+
+    sig = get_function_signature(func)
+    assert sig.args == [Field('arg', str, False)]
+    assert sig.output == Field(None, int, False)
+
+
+def test_get_class_fields():
     class AClass:
-        def __init__(self, field):
-            self.field = field
+        def __init__(self, field1: str, field2: int = 0): pass
 
-    assert str(AClass('value')) == 'AClass(field=value)'
+    fields = get_class_fields(AClass)
 
-
-def test_is_mapping():
-    assert is_mapping(Dict)
-    assert is_mapping(Dict[str, str])
-    assert not is_mapping(List)
-    assert not is_mapping(List[str])
-
-
-def test_is_generic():
-    assert is_generic(List)
-    assert is_generic(Dict)
-    assert is_generic(List[str])
-    assert not is_generic(list)
-
-
-def test_is_union():
-    assert is_union(Union)
-    assert is_union(Union[str, List[str]])
-    assert is_union(Union[str, None])
-    assert not is_union(List)
-    assert not is_union(List[str])
-
-
-def test_is_collection():
-    assert is_collection(List)
-    assert is_collection(List[str])
-    assert is_collection(Tuple)
-    assert is_collection(Tuple[str])
-    assert is_collection(Set)
-    assert is_collection(Set[str])
-    assert not is_collection(Coroutine)
+    assert fields == [Field('field1', str, False), Field('field2', int, True, 0)]
 
 
 def test_get_mapping_types():
@@ -62,44 +103,173 @@ def test_get_collection_internal_type():
     assert get_collection_internal_type(List[List[str]]) == List[str]
 
 
+def test_get_class_field_names():
+    class AClass:
+        def __init__(self, field1: str, field2: int = 0): pass
+
+    fields = get_class_field_names(AClass)
+
+    assert fields == ['field1', 'field2', ]
+
+
 def test_union_args():
     assert union_args(Union[str, int]) == (str, int)
     assert union_args(Union[List[str], List[int]]) == (List[str], List[int])
 
 
-def test_cached_property_laziness():
-    executed = [0]
+def test_turn_args_to_kwargs():
+    def func(a, b, c): pass
 
-    class WithCachedProperty:
-        @cached_property
-        def prop(self):
-            executed[0] = executed[0] + 1
-            return 'lol'
+    args = [1]
+    kwargs = {'b': 2, 'c': 3}
+    assert turn_args_to_kwargs(func, args, kwargs) == {'a': 1, 'b': 2, 'c': 3}
 
-    assert executed[0] == 0
+    class A:
+        def meth(self, a, b, c): pass
 
-    wc1 = WithCachedProperty()
-
-    assert executed[0] == 0
-
-    id(wc1.prop)
-    assert executed[0] == 1
-
-    id(wc1.prop)
-    assert executed[0] == 1
+    assert turn_args_to_kwargs(A.meth, args, kwargs) == {'a': 1, 'b': 2, 'c': 3}
 
 
-def test_cached_property_instance_uniqness():
-    executed = [0]
+def test_has_subtype_alias():
+    @type_field('aaaa')
+    class Root:
+        pass
 
-    class WithCachedProperty:
-        @cached_property
-        def prop(self):
-            executed[0] = executed[0] + 1
-            return 'lol'
+    class Child(Root):
+        pass
 
-    id(WithCachedProperty().prop)
-    assert executed[0] == 1
+    @as_list
+    class AsListRoot:
+        pass
 
-    id(WithCachedProperty().prop)
-    assert executed[0] == 2
+    assert has_subtype_alias(Root, {'aaaa': ''})
+    assert has_subtype_alias(Child, {'aaaa': ''})
+    assert not has_subtype_alias(Root, {'bbbb': ''})
+    assert has_subtype_alias(AsListRoot, ['a'])
+
+
+def test_has_hierarchy():
+    @type_field('aaaa')
+    class Root:
+        pass
+
+    class Child(Root):
+        pass
+
+    class NotRoot:
+        pass
+
+    assert has_hierarchy(Root)
+    assert has_hierarchy(Child)
+    assert not has_hierarchy(NotRoot)
+
+
+def test_issubclass_safe():
+    class myint(int):
+        pass
+
+    assert issubclass_safe(myint, int)
+    assert not issubclass_safe('1', int)
+    assert not issubclass_safe('1', '1')
+
+
+def test_is_descriptor():
+    class Descr:
+        def __get__(self, instance, owner): pass
+
+    class NotDescr:
+        pass
+
+    assert is_descriptor(Descr)
+    assert not is_descriptor(NotDescr)
+
+
+def test_is_serializable():
+    class Ser:
+        pass
+
+    class Unser(Unserializable):
+        pass
+
+    class UnserNested:
+        def __init__(self, field: Unser):
+            self.field = field
+
+    assert is_serializable(Ser())
+    assert not is_serializable(Unser())
+    assert not is_serializable(UnserNested(Unser()))
+
+
+def test_is_hierarchy_root():
+    @type_field('aaaa')
+    class Root:
+        pass
+
+    class Child(Root):
+        pass
+
+    class NotRoot:
+        pass
+
+    assert is_hierarchy_root(Root)
+    assert not is_hierarchy_root(Child)
+    assert not is_hierarchy_root(NotRoot)
+
+
+def test_type_field_position_is():
+    @type_field('aaaa', Position.INSIDE)
+    class Root:
+        pass
+
+    @type_field('aaaa', Position.OUTSIDE)
+    class Root2:
+        pass
+
+    assert type_field_position_is(Root, Position.INSIDE)
+    assert not type_field_position_is(Root, Position.OUTSIDE)
+    assert not type_field_position_is(Root2, Position.INSIDE)
+    assert type_field_position_is(Root2, Position.OUTSIDE)
+
+
+def test_resolve_subtype():
+    @type_field('aaaa', Position.INSIDE)
+    class Root:
+        aaaa = 'parent'
+
+    class Child(Root):
+        aaaa = 'child'
+
+    assert resolve_subtype(Root, {'aaaa': 'child'}) == Child
+
+    @type_field('aaaa', Position.OUTSIDE)
+    class Root2:
+        aaaa = 'parent'
+
+    class Child2(Root2):
+        aaaa = 'child'
+
+    assert resolve_subtype(Root2, {'aaaa': 'child'}) == Child2
+
+
+def test_comparable():
+    class AClass(Comparable):
+        def __init__(self, a: str, b: int):
+            self.a = a
+            self.b = b
+
+    obj1 = AClass('a', 0)
+    obj2 = AClass('a', 0)
+    obj3 = AClass('a', 1)
+
+    assert obj1 == obj2
+    assert obj1 is not obj2
+
+    assert obj1 != obj3
+
+
+def test_field():
+    def func(a: int, b: str = 'b'): pass
+
+    a, b = get_function_fields(func)
+    assert 'a: int' == f'{a}'
+    assert 'b: str = b' == f'{b}'

@@ -21,14 +21,10 @@ def is_collection37(as_class):
 def resolve_sequence_type37(type_hint, f):
     if is_collection37(type_hint):
         seq_type = type_hint.__args__[0]
-        try:
-            if isinstance(seq_type, typing._ForwardRef):
-                globals__ = f.__globals__
-                seq_type = seq_type._eval_type(globals__, globals__)
-                type_hint = typing.Sequence[seq_type]
-        except Exception:
-            pass
-            # traceback.print_exc()
+        if isinstance(seq_type, typing.ForwardRef):
+            globals__ = f.__globals__
+            seq_type = seq_type._evaluate(globals__, globals__)
+            type_hint = typing.Sequence[seq_type]
 
     return type_hint
 
@@ -43,6 +39,3 @@ def is_mapping37(as_class):
 
 def get_collection_type37(as_class: type):
     return as_class.__origin__
-
-
-typing.List

@@ -3,8 +3,8 @@ from typing import Iterable, Optional, Tuple
 import pytest
 
 from pyjackson import deserialize, serialize
-from pyjackson.comparable import Comparable
 from pyjackson.generics import Serializer
+from pyjackson.utils import Comparable
 
 
 class MockNumpyNdarray:
@@ -34,7 +34,7 @@ class MockNumpyNdarray:
         ])
 
 
-class MockNdarrayType(Serializer):
+class MockNdarraySerializer(Serializer):
     real_type = MockNumpyNdarray
 
     def __init__(self, shape: Tuple[Optional[int], ...], dtype: type):
@@ -52,17 +52,17 @@ class MockNdarrayType(Serializer):
 
 
 class SizedArrayContainer(Comparable):
-    def __init__(self, arr: MockNdarrayType((3,), int)):
+    def __init__(self, arr: MockNdarraySerializer((3,), int)):
         self.arr = arr
 
 
 class MultidimArrayContainer(Comparable):
-    def __init__(self, arr: MockNdarrayType((2, 3), int)):
+    def __init__(self, arr: MockNdarraySerializer((2, 3), int)):
         self.arr = arr
 
 
 class MultidimUnsizedArrayContainer(Comparable):
-    def __init__(self, arr: MockNdarrayType((None, 2), int)):
+    def __init__(self, arr: MockNdarraySerializer((None, 2), int)):
         self.arr = arr
 
 

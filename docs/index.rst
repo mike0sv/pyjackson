@@ -7,7 +7,7 @@ Contents
 
    readme
    installation
-   usage
+   usage/index
    reference/index
    contributing
    authors

@@ -1,10 +1,10 @@
 import sys
 
 from pyjackson import serialize
-from pyjackson.comparable import Comparable
+from pyjackson.decorators import make_string, type_field
 from pyjackson.deserialization import deserialize
 from pyjackson.generics import Serializer
-from pyjackson.utils import make_string, type_field
+from pyjackson.utils import Comparable
 
 _python_version = sys.version_info[:2]
 
@@ -24,9 +24,7 @@ class SizedTestType(Comparable, Serializer):
     def serialize(self, instance: AClass):
         return {'value': instance.const_list[0] if instance.const_list else None}
 
-    def deserialize(self, obj):
-        value = obj['value']
-        return AClass([value for _ in range(self.size)])
+    def deserialize(self, obj): pass
 
 
 @type_field('type')
@@ -44,9 +42,7 @@ class ChildGenericType(AbstractType, Comparable):
     def serialize(self, instance: AClass):
         return {'value': instance.const_list[0] if instance.const_list else None}
 
-    def deserialize(self, obj):
-        value = obj['value']
-        return AClass([value for _ in range(self.size)])
+    def deserialize(self, obj): pass
 
 
 class GenericTypeHolder(Comparable):
@@ -55,8 +51,7 @@ class GenericTypeHolder(Comparable):
 
 
 def test_use_as_type_hint():
-    def func(arg: SizedTestType(10)):
-        print(arg)
+    def func(arg: SizedTestType(10)): pass
 
     id(func.__annotations__)
 

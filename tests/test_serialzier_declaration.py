@@ -1,5 +1,5 @@
+from pyjackson.decorators import cached_property
 from pyjackson.generics import Serializer
-from pyjackson.utils import cached_property
 from tests.conftest import serde_and_compare
 
 

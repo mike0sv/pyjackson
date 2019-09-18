@@ -1,21 +1,10 @@
-from typing import Hashable, List, Set, Tuple, Type, Union
+from typing import Hashable, List, Set, Tuple
 
-from pyjackson.core import BUILTIN_TYPES, Position, PyjacksonError
-from pyjackson.generics import SERIALIZER_MAPPING, Serializer, StaticSerializer
+from pyjackson.core import BUILTIN_TYPES, Position
+from pyjackson.errors import SerializationError, UnserializableError
+from pyjackson.generics import SERIALIZER_MAPPING, Serializer, SerializerType, StaticSerializer
 from pyjackson.utils import (get_class_fields, get_type_field_name, is_aslist, is_serializable, is_union,
                              issubclass_safe, type_field_position_is, union_args)
-
-
-class SerializationError(PyjacksonError):
-    pass
-
-
-class UnserializableError(PyjacksonError):
-    def __init__(self, obj):
-        self.obj = obj
-
-    def __str__(self):
-        return '{} is not serializable'.format(self.obj)
 
 
 def _serialize_to_dict(cls, obj):
@@ -68,8 +57,7 @@ def _serialize_union(obj, class_union):
         raise SerializationError('None of the possible types matched for obj {} and type {}'.format(obj, as_class))
 
 
-# noinspection PyTypeChecker,PyArgumentList
-def serialize(obj, as_class: Union[Type, Serializer] = None):
+def serialize(obj, as_class: SerializerType = None):
     if not is_serializable(obj):
         raise UnserializableError(obj)
     """Convert object into python dict"""

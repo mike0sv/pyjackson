@@ -1,8 +1,12 @@
 from typing import Dict, List, Set, Tuple, Union
 
-import pyjackson as pyjackson
-from pyjackson.comparable import Comparable
-from pyjackson.utils import make_string, type_field
+import pytest
+
+import pyjackson
+from pyjackson.core import Unserializable
+from pyjackson.decorators import make_string, type_field
+from pyjackson.errors import UnserializableError
+from pyjackson.utils import Comparable
 from tests.conftest import serde_and_compare
 
 
@@ -10,12 +14,6 @@ from tests.conftest import serde_and_compare
 class Foo(Comparable):
     def __init__(self, bar: str):
         self.bar = bar
-
-
-@make_string
-class InDict(Comparable):
-    def __init__(self, foos: Dict[str, Foo]):
-        self.foos = foos
 
 
 @make_string
@@ -76,17 +74,12 @@ class WithHierarchyAsField(Comparable):
         self.field = field
 
 
-def test_comparable():
-    class C(Comparable):
-        def __init__(self, param: str):
-            self.param = param
+def test_unserializable():
+    class A(Unserializable):
+        pass
 
-    c1 = C('1')
-    c2 = C('2')
-    c1_2 = C('1')
-
-    assert c1 == c1_2
-    assert c1 != c2
+    with pytest.raises(UnserializableError):
+        serde_and_compare(A())
 
 
 def test_type_hint_with_default_exists():

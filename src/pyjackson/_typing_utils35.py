@@ -14,7 +14,7 @@ def resolve_sequence_type35(type_hint, f):
         seq_type = type_hint.__args__[0]
         if isinstance(seq_type, typing._ForwardRef):
             globals__ = f.__globals__
-            seq_type = seq_type._eval_type(globals__, globals__)
+            seq_type = seq_type._eval_type(globals__, {})
             type_hint = typing.Sequence[seq_type]
     return type_hint
 

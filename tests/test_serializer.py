@@ -5,10 +5,10 @@ from typing import List
 import pytest
 
 from pyjackson import deserialize
-from pyjackson.comparable import Comparable
+from pyjackson.decorators import make_string
 from pyjackson.generics import Serializer, StaticSerializer
 from pyjackson.serialization import SerializationError, serialize
-from pyjackson.utils import make_string
+from pyjackson.utils import Comparable
 from tests.conftest import serde_and_compare
 
 

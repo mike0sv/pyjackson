@@ -1,6 +1,6 @@
-from pyjackson import deserialize, serialize
-from pyjackson.comparable import Comparable
-from pyjackson.utils import as_list, make_string, type_field
+from pyjackson.decorators import as_list, make_string, type_field
+from pyjackson.utils import Comparable
+from tests.conftest import serde_and_compare
 
 
 @as_list
@@ -24,17 +24,11 @@ class ChildAL(ParentAL):
         self.a = a
 
 
-def test_simple_ser():
-    assert [1, 'a'] == serialize(SimpleAL(1, 'a'))
-
-
-def test_simple_deser():
-    assert SimpleAL(1, 'a') == deserialize([1, 'a'], SimpleAL)
+def test_simple():
+    obj = SimpleAL(1, 'a')
+    serde_and_compare(obj, true_payload=[1, 'a'])
 
 
 def test_hierarchy_ser():
-    assert ['child_al', 'b'] == serialize(ChildAL('b'))
-
-
-def test_hierarchy_deser():
-    assert ChildAL('b') == deserialize(['child_al', 'b'], ParentAL)
+    obj = ChildAL('b')
+    serde_and_compare(obj, true_payload=['child_al', 'b'])

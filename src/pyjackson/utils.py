@@ -1,87 +1,19 @@
 import inspect
-import sys
 import typing
 from copy import copy
 
 from pyjackson.core import (CLASS_SPECS_CACHE, TYPE_AS_LIST, TYPE_FIELD_NAME_FIELD_NAME, TYPE_FIELD_NAME_FIELD_POSITION,
-                            TYPE_FIELD_NAME_FIELD_ROOT, Position, PyjacksonError, Unserializable)
+                            TYPE_FIELD_NAME_FIELD_ROOT, Comparable, Field, Position, Signature, Unserializable)
+from pyjackson.errors import PyjacksonError
 
-_major, _minor, *_ = sys.version_info
+from ._typing_utils import get_collection_type, is_collection, is_generic, is_mapping, is_union, resolve_sequence_type
 
-if _major != 3 or _minor < 5:
-    raise Exception('Pyjackson works only with python version >= 3.5')
-
-if _minor < 7:
-    from ._utils35 import (resolve_sequence_type35 as resolve_sequence_type,
-                           is_generic35 as is_generic,
-                           is_mapping35 as is_mapping,
-                           get_collection_type35 as get_collection_type)
-
-    if _minor == 5:
-        from ._utils35 import is_union35 as is_union, is_collection35 as is_collection
-    else:
-        from ._utils36 import is_union36 as is_union, is_collection36 as is_collection
-
-elif _minor == 7:
-    from ._utils37 import (resolve_sequence_type37 as resolve_sequence_type,
-                           is_collection37 as is_collection,
-                           is_generic37 as is_generic,
-                           is_mapping37 as is_mapping,
-                           is_union37 as is_union,
-                           get_collection_type37 as get_collection_type)
-else:
-    raise Exception('Pyjackson works only with python version <= 3.7 yet(')
-
-__all__ = ['make_string', 'type_field', 'resolve_sequence_type', 'is_collection', 'is_union', 'is_mapping', 'is_aslist',
-           'type_field_position_is', 'union_args', 'get_collection_internal_type', 'get_mapping_types',
-           'get_class_fields', 'as_list', 'get_function_fields', 'argspec_to_fields', 'get_collection_type',
-           'get_function_signature', 'get_subtype_alias', 'get_type_field_name', 'has_hierarchy', 'resolve_subtype',
-           'is_generic', 'issubclass_safe', 'is_hierarchy_root', 'turn_args_to_kwargs', 'flat_dict_repr',
-           'has_subtype_alias', 'is_serializable', 'is_descriptor', 'cached_property', 'Field', 'Signature', 'ArgList']
-
-
-class cached_property:
-    def __init__(self, method):
-        self.method = method
-        self.field_name = '__{}_value'.format(method.__name__)
-
-    def __get__(self, instance, owner):
-        if instance is None:
-            return self
-        if not hasattr(instance, self.field_name):
-            value = self.method(instance)
-            setattr(instance, self.field_name, value)
-        else:
-            value = getattr(instance, self.field_name)
-        return value
-
-
-def make_string(*fields: str, include_name=True):
-    """Decorator to create a __str__ method for class based on __init__ arguments
-    Usage: directly @make_string on class defenition or @make_string(include_name=True) to include class name
-    """
-    if len(fields) == 1 and not isinstance(fields[0], str):
-        cls = fields[0]
-        fields = []
-    else:
-        cls = None
-
-    def make_str(cls):
-        def __str__(self):
-            flds = fields or [f.name for f in get_function_fields(cls.__init__, False)]
-            args = ','.join('{}={}'.format(key, getattr(self, key)) for key in flds)
-            args_str = str(args)
-            if include_name:
-                args_str = '({})'.format(args_str)
-            return cls.__name__ + args_str if include_name else args_str
-
-        cls.__str__ = __str__
-        cls.__repr__ = __str__
-        return cls
-
-    if cls is not None:
-        return make_str(cls)
-    return make_str
+__all__ = ['resolve_sequence_type', 'is_generic', 'is_mapping', 'is_union', 'is_collection', 'get_collection_type',
+           'flat_dict_repr', 'is_aslist', 'get_function_fields', 'get_type_field_name',
+           'get_subtype_alias', 'get_function_signature', 'get_class_fields', 'get_mapping_types',
+           'get_collection_internal_type', 'get_class_field_names', '_argspec_to_fields', 'union_args',
+           'turn_args_to_kwargs', 'has_subtype_alias', 'has_hierarchy', 'issubclass_safe', 'is_descriptor',
+           'is_serializable', 'is_hierarchy_root', 'type_field_position_is', 'resolve_subtype', 'Comparable']
 
 
 def flat_dict_repr(d: dict, func_order=None, sep=',', braces=False):
@@ -95,26 +27,8 @@ def flat_dict_repr(d: dict, func_order=None, sep=',', braces=False):
     return sep.join('{}={}'.format(k, d[k]) for k in order)
 
 
-@make_string('name', 'type', include_name=True)
-class Field:
-    def __init__(self, name, type, has_default, default=None):
-        self.name = name
-        self.type = type
-        self.has_default = has_default
-        self.default = default
-
-
-ArgList = typing.List[Field]
-Signature = typing.NamedTuple('Signature', [('args', ArgList), ('output', Field)])
-
-
 def is_aslist(cls: typing.Type):
     return hasattr(cls, TYPE_AS_LIST) and getattr(cls, TYPE_AS_LIST)
-
-
-def as_list(cls: typing.Type):
-    setattr(cls, TYPE_AS_LIST, True)
-    return cls
 
 
 def get_function_signature(f) -> Signature:
@@ -130,10 +44,10 @@ def get_function_fields(f, types_required=True) -> typing.List[Field]:
     defaults = spec.defaults
     hints = typing.get_type_hints(f)
 
-    return argspec_to_fields(f, arguments, defaults, hints, types_required=types_required)
+    return _argspec_to_fields(f, arguments, defaults, hints, types_required=types_required)
 
 
-def argspec_to_fields(f, arguments, defaults, hints, types_required=True) -> typing.List[Field]:
+def _argspec_to_fields(f, arguments, defaults, hints, types_required=True) -> typing.List[Field]:
     defaults_num = len(defaults) if defaults is not None else 0
     non_defaults_num = len(arguments) - defaults_num
     fields = []
@@ -174,55 +88,13 @@ def get_class_fields(cls: type) -> typing.List[Field]:
             defaults = spec.defaults
             hints = typing.get_type_hints(cls.__init__)
 
-        fields = argspec_to_fields(cls.__init__, arguments, defaults, hints)
+        fields = _argspec_to_fields(cls.__init__, arguments, defaults, hints)
         CLASS_SPECS_CACHE[cls] = fields
     return CLASS_SPECS_CACHE[cls]
 
 
 def get_class_field_names(cls: type) -> typing.List[str]:
-    return [f.name for f in get_class_fields(cls)]
-
-
-def type_field(field_name, position: Position = Position.INSIDE, propagate=True):
-    """Class decorator for polymorphic hierarchies to define class field name, where subclass's type alias will be stored
-    Use it on hierarchy root class, add class field  with defined name to any subclasses
-    The same field name will be used during deserialization
-    """
-
-    class SubtypeRegisterMixin:
-        _subtypes = dict()
-
-        locals()[TYPE_FIELD_NAME_FIELD_NAME] = field_name
-        locals()[TYPE_FIELD_NAME_FIELD_POSITION] = position
-
-        def __init_subclass__(cls, **kwargs):
-            super(SubtypeRegisterMixin, cls).__init_subclass__(**kwargs)
-            subtype_name = getattr(cls, field_name, None)
-            if subtype_name is None:
-                return
-
-            existing = SubtypeRegisterMixin._subtypes.get(subtype_name, None)
-            if existing is not None and existing != cls:
-                msg = 'Cant register {} as {}. Subtype {} is already registered'.format(cls, subtype_name, existing)
-                from pyjackson.generics import Serializer
-                if issubclass(cls, Serializer):
-                    # allow reregistration if cls is generic type and it's base was registered during declaration
-                    if cls._is_dynamic:
-                        # do not register initialized generics
-                        return
-                    if issubclass(existing, Serializer) and issubclass(cls, existing):
-                        # raise if cls is child of existing and does not declare type alias
-                        raise ValueError(msg)
-                else:
-                    raise ValueError(msg)
-            SubtypeRegisterMixin._subtypes[subtype_name] = cls
-
-    def class_wrap(root_cls):
-        wrapped = type('Registering{}'.format(root_cls.__name__), (root_cls, SubtypeRegisterMixin), {})
-        setattr(wrapped, TYPE_FIELD_NAME_FIELD_ROOT, wrapped)
-        return wrapped
-
-    return class_wrap
+    return list(inspect.getfullargspec(cls.__init__).args[1:])
 
 
 def has_hierarchy(cls):
@@ -233,7 +105,7 @@ def is_hierarchy_root(cls):
     return has_hierarchy(cls) and getattr(cls, TYPE_FIELD_NAME_FIELD_ROOT) == cls
 
 
-def type_field_position_is(cls, position):
+def type_field_position_is(cls, position: Position):
     return has_hierarchy(cls) and getattr(cls, TYPE_FIELD_NAME_FIELD_POSITION) == position
 
 
@@ -289,13 +161,5 @@ def is_descriptor(obj):
 
 
 def is_serializable(obj) -> bool:  # TODO add recursive check for builtin unser types like bytes
-    return not isinstance(obj, Unserializable)
-
-
-class ArgHashable:
-    @cached_property
-    def __hash_args__(self):
-        return inspect.getfullargspec(self.__class__.__init__).args[1:]
-
-    def __hash__(self):
-        return hash((self.__class__.__name__,) + tuple(getattr(self, a) for a in self.__hash_args__))
+    return not isinstance(obj, Unserializable) and \
+           all(is_serializable(getattr(obj, f)) for f in get_class_field_names(type(obj)))
