@@ -8,7 +8,7 @@ Contents
    readme
    installation
    usage/index
-   reference/index
+   reference/pyjackson
    contributing
    authors
    changelog

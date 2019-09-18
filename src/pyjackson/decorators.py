@@ -23,9 +23,11 @@ class cached_property:
 
 
 def make_string(*fields: str, include_name=True):
-    """Decorator to create a `__str__` method for class based on `__init__` arguments
+    """
+    Decorator to create a `__str__` method for class based on `__init__` arguments
+
     Usage: directly :func:`@make_string` on class declaration to include all fields
-    or @make_string(*fields, include_name) to alter params
+    or :func:`@make_string(*fields, include_name)` to alter params
 
     :param fields: list of strings with field names
     :param include_name: whether to include class name
@@ -56,10 +58,9 @@ def make_string(*fields: str, include_name=True):
 
 def as_list(cls: typing.Type):
     """
-    Decorator to mark class to serialize it to list instead of dict
+    Mark class to serialize it to list instead of dict
 
     :param cls: class to mark
-    :return: same class
     """
     setattr(cls, TYPE_AS_LIST, True)
     return cls
@@ -72,8 +73,6 @@ def type_field(field_name, position: Position = Position.INSIDE):
 
     :param field_name: class field name to put alias for type
     :param position: where to put type alias
-
-    :return same class
     """
 
     class SubtypeRegisterMixin:
@@ -113,7 +112,7 @@ def type_field(field_name, position: Position = Position.INSIDE):
 
 
 def real_types(*types):
-    """Decorator to register multiple real types for one serializer"""
+    """Register multiple real types for one serializer"""
 
     def dec(cls):
         for t in types:

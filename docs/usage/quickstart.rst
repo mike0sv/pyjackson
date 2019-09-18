@@ -30,7 +30,7 @@ It also works with nested structures and supports `typing` module generic annota
         def __init__(self, payload_list: typing.List[MyPayload]):
             self.payload_list = payload_list
 
-    plist = PayloadList([instance, new_instance])
+    plist = PayloadList([instance])
     payloads = pyjackson.serialize(plist)
     # {'payload_list': [{'string_field': 'value', 'int_field': 10}]}
 

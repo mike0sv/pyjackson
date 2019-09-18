@@ -1,9 +1,17 @@
-pyjackson
-=========
-
-.. testsetup::
-
-    from pyjackson import *
+pyjackson package
+=================
 
 .. automodule:: pyjackson
-    :members:
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+
+   pyjackson.core
+   pyjackson.decorators
+   pyjackson.errors
+   pyjackson.generics

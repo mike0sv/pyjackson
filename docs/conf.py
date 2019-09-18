@@ -3,8 +3,8 @@ from __future__ import unicode_literals
 
 import os
 
-
 extensions = [
+    'sphinxcontrib.apidoc',
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
     'sphinx.ext.coverage',
@@ -35,6 +35,7 @@ extlinks = {
     'pr': ('https://github.com/mike0sv/pyjackson/pull/%s', 'PR #'),
 }
 import sphinx_rtd_theme
+
 html_theme = "sphinx_rtd_theme"
 html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 # html_theme_options = {
@@ -45,10 +46,19 @@ html_use_smartypants = True
 html_last_updated_fmt = '%b %d, %Y'
 html_split_index = False
 html_sidebars = {
-   '**': ['searchbox.html', 'globaltoc.html', 'sourcelink.html'],
+    '**': ['searchbox.html', 'globaltoc.html', 'sourcelink.html'],
 }
 html_short_title = '%s-%s' % (project, version)
 
 napoleon_use_ivar = True
 napoleon_use_rtype = False
 napoleon_use_param = False
+
+apidoc_module_dir = '../src/pyjackson'
+apidoc_output_dir = 'reference'
+apidoc_excluded_paths = ['deserialization*', 'serialization*', 'builtin_types*', 'helpers*', 'utils*']
+apidoc_toc_file = False
+apidoc_module_first = True
+apidoc_separate_modules = True
+
+autodoc_member_order = 'bysource'

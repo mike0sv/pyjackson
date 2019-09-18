@@ -78,7 +78,9 @@ def deserialize(obj, as_class: SerializerType):
     :param obj: dict (or list or any primitive) to deserialize
     :param as_class: type or serializer
 
-    :return deserialized instance of as_class (or real_type of serializer)
+    :return: deserialized instance of as_class (or real_type of serializer)
+
+    :raise: DeserializationError
     """
     if is_generic(as_class):
         if is_mapping(as_class):
@@ -106,4 +108,4 @@ def deserialize(obj, as_class: SerializerType):
                 except TypeError:
                     pass
             else:
-                raise TypeError("Cannot construct type {} from argument list {}".format(as_class, obj))
+                raise DeserializationError("Cannot construct type {} from argument list {}".format(as_class, obj))
