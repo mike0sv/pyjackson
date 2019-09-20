@@ -2,8 +2,10 @@ import inspect
 import typing
 from copy import copy
 
-from pyjackson.core import (CLASS_SPECS_CACHE, TYPE_AS_LIST, TYPE_FIELD_NAME_FIELD_NAME, TYPE_FIELD_NAME_FIELD_POSITION,
-                            TYPE_FIELD_NAME_FIELD_ROOT, Comparable, Field, Position, Signature, Unserializable)
+from pyjackson import generics
+from pyjackson.core import (BUILTIN_TYPES, CLASS_SPECS_CACHE, TYPE_AS_LIST, TYPE_FIELD_NAME_FIELD_NAME,
+                            TYPE_FIELD_NAME_FIELD_POSITION, TYPE_FIELD_NAME_FIELD_ROOT, Comparable, Field, Position,
+                            Signature, Unserializable)
 from pyjackson.errors import PyjacksonError
 
 from ._typing_utils import get_collection_type, is_collection, is_generic, is_mapping, is_union, resolve_sequence_type
@@ -13,10 +15,20 @@ __all__ = ['resolve_sequence_type', 'is_generic', 'is_mapping', 'is_union', 'is_
            'get_subtype_alias', 'get_function_signature', 'get_class_fields', 'get_mapping_types',
            'get_collection_internal_type', 'get_class_field_names', '_argspec_to_fields', 'union_args',
            'turn_args_to_kwargs', 'has_subtype_alias', 'has_hierarchy', 'issubclass_safe', 'is_descriptor',
-           'is_serializable', 'is_hierarchy_root', 'type_field_position_is', 'resolve_subtype', 'Comparable']
+           'has_serializer', 'is_init_type_hinted_and_has_correct_attrs', 'is_serializable', 'is_hierarchy_root',
+           'type_field_position_is', 'resolve_subtype', 'Comparable']
 
 
 def flat_dict_repr(d: dict, func_order=None, sep=',', braces=False):
+    """
+    Turn dict into string of key=value pairs, separated by sep
+    :param d: the dict
+    :param func_order: if passed, order of pairs will conform to order of arguments.
+    key set must be the same as func arg list
+    :param sep: separator
+    :param braces: whether to surround with braces
+    :return: string representation
+    """
     if braces:
         return '{' + flat_dict_repr(d, func_order, sep, False) + '}'
 
@@ -28,15 +40,33 @@ def flat_dict_repr(d: dict, func_order=None, sep=',', braces=False):
 
 
 def is_aslist(cls: typing.Type):
+    """
+    Checks if cls was marked to be serialized as list
+
+    :param cls: type to check
+    :return: boolean
+    """
     return hasattr(cls, TYPE_AS_LIST) and getattr(cls, TYPE_AS_LIST)
 
 
 def get_function_signature(f) -> Signature:
+    """
+    Get function arguments as list of :class:`~pyjackson.core.Field` and annotated return type
+    :param f: function
+    :return: Signature named tuple
+    """
     ret = Field(None, f.__annotations__.get('return'), False)
     return Signature(get_function_fields(f), ret)
 
 
 def get_function_fields(f, types_required=True) -> typing.List[Field]:
+    """
+    Get function arguments as list of :class:`~pyjackson.core.Field`
+
+    :param f: function
+    :param types_required: raise exception if args not type hinted
+    :return: list of :class:`~pyjackson.core.Field`
+    """
     spec = inspect.getfullargspec(f)
     arguments = spec.args
     if inspect.ismethod(f) or arguments[0] == 'self':  # TODO better method detection
@@ -64,6 +94,15 @@ def _argspec_to_fields(f, arguments, defaults, hints, types_required=True) -> ty
 
 
 def turn_args_to_kwargs(func, args, kwargs, skip_first=False):
+    """
+    Turn *args, **kwargs into just **kwargs for specified function
+
+    :param func: function
+    :param args: *args
+    :param kwargs: **kwargs
+    :param skip_first: skip first arg (used for methods)
+    :return: **kwargs dict
+    """
     kwargs = copy(kwargs)
     fields = get_function_fields(func, types_required=False)
     if skip_first:
@@ -94,6 +133,12 @@ def get_class_fields(cls: type) -> typing.List[Field]:
 
 
 def get_class_field_names(cls: type) -> typing.List[str]:
+    """
+    Get class field names, which must be list of `__init__` arguments
+
+    :param cls: class
+    :return: list of field names
+    """
     return list(inspect.getfullargspec(cls.__init__).args[1:])
 
 
@@ -145,7 +190,7 @@ def get_collection_internal_type(as_class: typing.Type):
 def union_args(cls):
     try:
         return cls.__args__
-    except Exception:
+    except AttributeError:
         return cls.__union_params__
 
 
@@ -160,6 +205,20 @@ def is_descriptor(obj):
     return any(hasattr(obj, a) for a in ['__get__', '__set__', '__delete__'])
 
 
-def is_serializable(obj) -> bool:  # TODO add recursive check for builtin unser types like bytes
+def has_serializer(as_class: typing.Type):
+    return isinstance(as_class, typing.Hashable) and \
+           as_class in generics.SERIALIZER_MAPPING and \
+           not isinstance(as_class, generics.Serializer)
+
+
+def is_init_type_hinted_and_has_correct_attrs(obj):
+    try:
+        class_fields = get_class_fields(type(obj))
+    except PyjacksonError:
+        return False
+    return all(hasattr(obj, a.name) for a in class_fields)
+
+
+def is_serializable(obj) -> bool:
     return not isinstance(obj, Unserializable) and \
-           all(is_serializable(getattr(obj, f)) for f in get_class_field_names(type(obj)))
+           (has_serializer(type(obj)) or is_init_type_hinted_and_has_correct_attrs(obj) or type(obj) in BUILTIN_TYPES)

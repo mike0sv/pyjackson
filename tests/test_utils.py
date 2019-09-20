@@ -5,11 +5,13 @@ import pytest
 from pyjackson.core import Field, Position, Unserializable
 from pyjackson.decorators import as_list, type_field
 from pyjackson.errors import PyjacksonError
+from pyjackson.generics import StaticSerializer
 from pyjackson.utils import (Comparable, flat_dict_repr, get_class_field_names, get_class_fields,
                              get_collection_internal_type, get_function_fields, get_function_signature,
-                             get_mapping_types, get_subtype_alias, get_type_field_name, has_hierarchy,
-                             has_subtype_alias, is_aslist, is_descriptor, is_hierarchy_root, is_serializable,
-                             issubclass_safe, resolve_subtype, turn_args_to_kwargs, type_field_position_is, union_args)
+                             get_mapping_types, get_subtype_alias, get_type_field_name, has_hierarchy, has_serializer,
+                             has_subtype_alias, is_aslist, is_descriptor, is_hierarchy_root,
+                             is_init_type_hinted_and_has_correct_attrs, is_serializable, issubclass_safe,
+                             resolve_subtype, turn_args_to_kwargs, type_field_position_is, union_args)
 
 
 def test_flat_dict_repr():
@@ -184,20 +186,80 @@ def test_is_descriptor():
     assert not is_descriptor(NotDescr)
 
 
+def test_has_serializer():
+    class ExternalClass:
+        def __init__(self, a):
+            self.b = a
+
+    class ExternalSerializer(StaticSerializer):
+        real_type = ExternalClass
+
+        @classmethod
+        def deserialize(cls, obj: dict) -> object:
+            return ExternalClass(obj['c'])
+
+        @classmethod
+        def serialize(cls, instance: ExternalClass) -> dict:
+            return {'c': instance.b}
+
+    class ExternalNoSerializer:
+        def __init__(self, a):
+            self.b = a
+
+    assert has_serializer(ExternalClass)
+    assert not has_serializer(ExternalNoSerializer)
+
+
+def test_is_init_type_hinted_and_has_correct_attrs():
+    class Good:
+        def __init__(self, a: int):
+            self.a = a
+
+    class BadNoTypeHints:
+        def __init__(self, a):
+            self.a = a
+
+    class BadNoAttr:
+        def __init__(self, a: int):
+            self.b = a
+
+    assert is_init_type_hinted_and_has_correct_attrs(Good(1))
+    assert not is_init_type_hinted_and_has_correct_attrs(BadNoTypeHints(1))
+    assert not is_init_type_hinted_and_has_correct_attrs(BadNoAttr(1))
+
+
 def test_is_serializable():
     class Ser:
-        pass
+        def __init__(self, a: int):
+            self.a = a
 
     class Unser(Unserializable):
         pass
 
-    class UnserNested:
-        def __init__(self, field: Unser):
-            self.field = field
+    class ExternalClass:
+        def __init__(self, a):
+            self.b = a
 
-    assert is_serializable(Ser())
+    class ExternalSerializer(StaticSerializer):
+        real_type = ExternalClass
+
+        @classmethod
+        def deserialize(cls, obj: dict) -> object:
+            return ExternalClass(obj['c'])
+
+        @classmethod
+        def serialize(cls, instance: ExternalClass) -> dict:
+            return {'c': instance.b}
+
+    class ExternalNoSerializer:
+        def __init__(self, a):
+            self.b = a
+
+    assert is_serializable(Ser(1))
     assert not is_serializable(Unser())
-    assert not is_serializable(UnserNested(Unser()))
+
+    assert is_serializable(ExternalClass(1))
+    assert not is_serializable(ExternalNoSerializer(1))
 
 
 def test_is_hierarchy_root():
