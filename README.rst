@@ -41,9 +41,9 @@ Overview
     :alt: PyPI Package latest release
     :target: https://pypi.org/project/pyjackson
 
-.. |commits-since| image:: https://img.shields.io/github.com/commits-since/mike0sv/pyjackson/v0.0.3.svg
+.. |commits-since| image:: https://img.shields.io/github.com/commits-since/mike0sv/pyjackson/v0.0.4.svg
     :alt: Commits since latest release
-    :target: https://github.com/mike0sv/pyjackson/compare/v0.0.3...master
+    :target: https://github.com/mike0sv/pyjackson/compare/v0.0.4...master
 
 .. |wheel| image:: https://img.shields.io/pypi/wheel/pyjackson.svg
     :alt: PyPI Wheel
