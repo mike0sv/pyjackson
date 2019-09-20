@@ -80,7 +80,7 @@ https://pyjackson.readthedocs.io/
 Development
 ===========
 
-To run the all tests run::
+To run all tests run::
 
     tox
 
