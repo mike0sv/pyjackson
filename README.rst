@@ -61,7 +61,29 @@ Overview
 
 PyJackson is a serialization library based on type hinting
 
-* Free software: Apache Software License 2.0
+Example
+==========
+
+Just type hint `__init__` and you are ready to go::
+
+    import pyjackson
+
+
+    class MyPayload:
+        def __init__(self, string_field: str, int_field: int):
+            self.string_field = string_field
+            self.int_field = int_field
+
+
+    pyjackson.serialize(MyPayload('value', 10))  # {'string_field': 'value', 'int_field': 10}
+
+    pyjackson.deserialize({'string_field': 'value', 'int_field': 10}, MyPayload)  # MyPayload('value', 10)
+
+..
+
+More features and examples `here<https://pyjackson.readthedocs.io/en/latest/usage/index.html>`_ and in examples dir.
+
+
 
 Installation
 ============
@@ -84,3 +106,9 @@ To run all tests run::
 
     tox
 
+..
+
+Licence
+=======
+
+* Free software: Apache Software License 2.0
