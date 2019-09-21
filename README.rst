@@ -81,7 +81,8 @@ Just type hint `__init__` and you are ready to go::
 
 ..
 
-More features and examples `here<https://pyjackson.readthedocs.io/en/latest/usage/index.html>`_ and in examples dir.
+More features and examples `here
+<https://pyjackson.readthedocs.io/en/latest/usage/index.html>`_ and in examples dir.
 
 
 
