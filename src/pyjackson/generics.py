@@ -63,6 +63,9 @@ class _SerializerMeta(type, metaclass=_SerializerMetaMeta):
     def __eq__(self, other):
         if other is self._metaclass:
             return True
+        if isinstance(other, _SerializerMeta) and (self._is_dynamic and
+                                                   other._is_dynamic) and self._class is other._class:
+            return all(getattr(self, f) == getattr(other, f) for f in self._fields)
         return super(_SerializerMeta, self).__eq__(other)
 
     def __subclasscheck__(self, subclass):
@@ -90,6 +93,10 @@ class _SerializerMeta(type, metaclass=_SerializerMetaMeta):
     @property
     def _class(cls):
         return getattr(cls, '_parent_class', cls)
+
+    @property
+    def _fields(cls):
+        return getattr(cls, '_init_args', tuple())
 
 
 def _type_cache(func):
@@ -193,7 +200,8 @@ class Serializer(metaclass=_SerializerMeta):
         new_metaclass = type(metaclass_name, (metaclass,), {'_dynamic': True, '_parent_metaclass': metaclass})
 
         type_name = '{}[{}]'.format(cls.__name__, kwargs_str)
-        new_type = new_metaclass(type_name, (cls,), {'_dynamic': True, '_parent_class': cls})
+        new_type = new_metaclass(type_name, (cls,),
+                                 {'_dynamic': True, '_parent_class': cls, '_init_args': tuple(kwargs.keys())})
         instance = new_type(**kwargs)
         return instance
 
@@ -212,6 +220,7 @@ class Serializer(metaclass=_SerializerMeta):
     def __eq__(self, other):
         if isinstance(other, _SerializerMeta):
             return False
+        print('lolo' * 10)
         return super().__eq__(other)
 
     def __subclasscheck__(self, subclass):

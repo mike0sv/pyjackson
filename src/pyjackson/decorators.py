@@ -88,7 +88,7 @@ def type_field(field_name, position: Position = Position.INSIDE):
                 return
 
             existing = SubtypeRegisterMixin._subtypes.get(subtype_name, None)
-            if existing is not None and existing != cls:
+            if existing is not None:
                 msg = 'Cant register {} as {}. Subtype {} is already registered'.format(cls, subtype_name, existing)
                 from pyjackson.generics import Serializer
                 if issubclass(cls, Serializer):
@@ -99,7 +99,7 @@ def type_field(field_name, position: Position = Position.INSIDE):
                     if issubclass(existing, Serializer) and issubclass(cls, existing):
                         # raise if cls is child of existing and does not declare type alias
                         raise ValueError(msg)
-                else:
+                elif existing != cls:  # it's not serializer and different class
                     raise ValueError(msg)
             SubtypeRegisterMixin._subtypes[subtype_name] = cls
 
