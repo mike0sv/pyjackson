@@ -1,4 +1,4 @@
-from typing import Dict, List, Union
+from typing import Dict, List, Tuple, Union
 
 import pytest
 
@@ -8,10 +8,10 @@ from pyjackson.errors import PyjacksonError
 from pyjackson.generics import StaticSerializer
 from pyjackson.utils import (Comparable, flat_dict_repr, get_class_field_names, get_class_fields,
                              get_collection_internal_type, get_function_fields, get_function_signature,
-                             get_mapping_types, get_subtype_alias, get_type_field_name, has_hierarchy, has_serializer,
-                             has_subtype_alias, is_aslist, is_descriptor, is_hierarchy_root,
-                             is_init_type_hinted_and_has_correct_attrs, is_serializable, issubclass_safe,
-                             resolve_subtype, turn_args_to_kwargs, type_field_position_is, union_args)
+                             get_mapping_types, get_subtype_alias, get_tuple_internal_types, get_type_field_name,
+                             has_hierarchy, has_serializer, has_subtype_alias, is_aslist, is_descriptor,
+                             is_hierarchy_root, is_init_type_hinted_and_has_correct_attrs, is_serializable,
+                             issubclass_safe, resolve_subtype, turn_args_to_kwargs, type_field_position_is, union_args)
 
 
 def test_flat_dict_repr():
@@ -335,3 +335,9 @@ def test_field():
     a, b = get_function_fields(func)
     assert 'a: int' == f'{a}'
     assert 'b: str = b' == f'{b}'
+
+
+def test_get_tuple_internal_types():
+    assert get_tuple_internal_types(Tuple[int]) == (False, (int,))
+    assert get_tuple_internal_types(Tuple[int, str]) == (False, (int, str))
+    assert get_tuple_internal_types(Tuple[int, ...]) == (True, int)

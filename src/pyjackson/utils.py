@@ -8,15 +8,16 @@ from pyjackson.core import (BUILTIN_TYPES, CLASS_SPECS_CACHE, TYPE_AS_LIST, TYPE
                             Signature, Unserializable)
 from pyjackson.errors import PyjacksonError
 
-from ._typing_utils import get_collection_type, is_collection, is_generic, is_mapping, is_union, resolve_sequence_type
+from ._typing_utils import (get_collection_type, is_collection, is_generic, is_mapping, is_tuple, is_union,
+                            resolve_inner_forward_refs)
 
-__all__ = ['resolve_sequence_type', 'is_generic', 'is_mapping', 'is_union', 'is_collection', 'get_collection_type',
+__all__ = ['resolve_inner_forward_refs', 'is_generic', 'is_mapping', 'is_union', 'is_collection', 'get_collection_type',
            'flat_dict_repr', 'is_aslist', 'get_function_fields', 'get_type_field_name',
            'get_subtype_alias', 'get_function_signature', 'get_class_fields', 'get_mapping_types',
            'get_collection_internal_type', 'get_class_field_names', '_argspec_to_fields', 'union_args',
            'turn_args_to_kwargs', 'has_subtype_alias', 'has_hierarchy', 'issubclass_safe', 'is_descriptor',
            'has_serializer', 'is_init_type_hinted_and_has_correct_attrs', 'is_serializable', 'is_hierarchy_root',
-           'type_field_position_is', 'resolve_subtype', 'Comparable']
+           'type_field_position_is', 'resolve_subtype', 'Comparable', 'get_tuple_internal_types', 'is_tuple']
 
 
 def flat_dict_repr(d: dict, func_order=None, sep=',', braces=False):
@@ -85,7 +86,7 @@ def _argspec_to_fields(f, arguments, defaults, hints, types_required=True) -> ty
         has_default = i >= non_defaults_num
         if arg not in hints and types_required:
             raise PyjacksonError('arguments must be typehinted for function {}'.format(f))
-        type_hint = resolve_sequence_type(hints.get(arg), f)
+        type_hint = resolve_inner_forward_refs(hints.get(arg), f)
         field = Field(arg, type_hint, has_default)
         if has_default:
             field.default = defaults[i - non_defaults_num]
@@ -185,6 +186,14 @@ def get_mapping_types(as_class: typing.Type):
 def get_collection_internal_type(as_class: typing.Type):
     seq_type = as_class.__args__[0]
     return seq_type
+
+
+def get_tuple_internal_types(as_class):
+    args = as_class.__args__
+    if args[-1] is ...:
+        return True, args[0]
+    else:
+        return False, args
 
 
 def union_args(cls):

@@ -10,7 +10,6 @@ def is_generic37(as_class: typing.Type):
 
 _collection_types = [
     collections.abc.Collection,
-    tuple
 ]
 
 
@@ -18,14 +17,16 @@ def is_collection37(as_class):
     return is_generic37(as_class) and any(issubclass(as_class.__origin__, t) for t in _collection_types)
 
 
-def resolve_sequence_type37(type_hint, f):
-    if is_collection37(type_hint):
-        seq_type = type_hint.__args__[0]
-        if isinstance(seq_type, typing.ForwardRef):
-            globals__ = f.__globals__
-            seq_type = seq_type._evaluate(globals__, globals__)
-            type_hint = typing.Sequence[seq_type]
+def resolve_forward_ref37(type_hint, globals__):
+    if isinstance(type_hint, typing.ForwardRef):
+        type_hint = type_hint._evaluate(globals__, {})
+    return type_hint
 
+
+def resolve_inner_forward_refs37(type_hint, f):
+    if is_generic37(type_hint):
+        args = [resolve_forward_ref37(a, f.__globals__) for a in type_hint.__args__]
+        type_hint = type_hint.copy_with(tuple(args))
     return type_hint
 
 
@@ -39,3 +40,7 @@ def is_mapping37(as_class):
 
 def get_collection_type37(as_class: type):
     return as_class.__origin__
+
+
+def is_tuple37(as_class):
+    return isinstance(as_class, typing._GenericAlias) and as_class.__origin__ is tuple

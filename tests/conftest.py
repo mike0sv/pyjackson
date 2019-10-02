@@ -5,7 +5,7 @@ import pytest
 import pyjackson
 from pyjackson.decorators import make_string
 from pyjackson.generics import Serializer
-from pyjackson.utils import Comparable
+from pyjackson.utils import Comparable, is_generic, issubclass_safe
 
 
 @pytest.fixture
@@ -33,7 +33,7 @@ def serde_and_compare(obj, obj_type=None, true_payload=None, check_payload=True)
         check_subtype = False
         check_instance = True
     else:
-        check_subtype = not issubclass(obj_type, Serializer)
+        check_subtype = not issubclass_safe(obj_type, Serializer) and not is_generic(obj_type)
         check_instance = False
 
     payload = pyjackson.serialize(obj, obj_type)

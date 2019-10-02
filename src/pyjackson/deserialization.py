@@ -4,8 +4,9 @@ from pyjackson.core import BUILTIN_TYPES, Field, Position
 from pyjackson.errors import DeserializationError
 from pyjackson.generics import SERIALIZER_MAPPING, Serializer, SerializerType, StaticSerializer
 from pyjackson.utils import (get_class_fields, get_collection_internal_type, get_collection_type, get_mapping_types,
-                             has_subtype_alias, is_aslist, is_collection, is_generic, is_hierarchy_root, is_mapping,
-                             is_union, resolve_subtype, type_field_position_is, union_args)
+                             get_tuple_internal_types, has_subtype_alias, is_aslist, is_collection, is_generic,
+                             is_hierarchy_root, is_mapping, is_tuple, is_union, resolve_subtype, type_field_position_is,
+                             union_args)
 
 
 def _get_field_type(field: Field, obj):
@@ -89,6 +90,12 @@ def deserialize(obj, as_class: SerializerType):
                 raise DeserializationError(
                     'mapping key type must be str, not {}. error deserializing {}'.format(key_type, obj))
             return {k: deserialize(v, value_type) for k, v in obj.items()}
+        elif is_tuple(as_class):
+            var_length, types = get_tuple_internal_types(as_class)
+            if var_length:
+                return tuple(deserialize(o, types) for o in obj)
+            else:
+                return tuple(deserialize(o, t) for o, t in zip(obj, types))
         elif is_collection(as_class):
             seq_int_type = get_collection_internal_type(as_class)
             seq_type = get_collection_type(as_class)

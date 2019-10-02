@@ -6,16 +6,19 @@ def is_generic35(as_class: typing.Type):
 
 
 def is_collection35(as_class):
-    return issubclass(as_class, (typing.List, typing.Set, typing.Tuple))
+    return issubclass(as_class, (typing.List, typing.Set))
 
 
-def resolve_sequence_type35(type_hint, f):
-    if is_generic35(type_hint) and is_collection35(type_hint):
-        seq_type = type_hint.__args__[0]
-        if isinstance(seq_type, typing._ForwardRef):
-            globals__ = f.__globals__
-            seq_type = seq_type._eval_type(globals__, {})
-            type_hint = typing.Sequence[seq_type]
+def resolve_forward_ref35(type_hint, globals__):
+    if isinstance(type_hint, typing._ForwardRef):
+        type_hint = type_hint._eval_type(globals__, {})
+    return type_hint
+
+
+def resolve_inner_forward_refs35(type_hint, f):
+    if is_generic35(type_hint):
+        args = [resolve_forward_ref35(a, f.__globals__) for a in type_hint.__args__]
+        type_hint = type_hint.__origin__[tuple(args)]
     return type_hint
 
 
@@ -38,3 +41,7 @@ def get_collection_type35(as_class: type):
     elif issubclass(as_class, typing.Tuple):
         return tuple
     raise ValueError('Unknown sequence type {}'.format(as_class))
+
+
+def is_tuple35(as_class):
+    return issubclass(as_class, typing.Tuple)
