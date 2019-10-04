@@ -1,3 +1,4 @@
+import datetime
 import uuid
 
 import pytest
@@ -24,3 +25,12 @@ def test_primitive_type_raises(type_factory):
 
     with pytest.raises(SerializationError):
         serialize(Foo(Foo))
+
+
+def test_datetime_serializer(type_factory):
+    Foo = type_factory('Foo', datetime.datetime)
+    foo = Foo(datetime.datetime.now())
+    serde_and_compare(foo, Foo)
+
+    bar = Foo(datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=-3))))
+    serde_and_compare(bar, Foo)
