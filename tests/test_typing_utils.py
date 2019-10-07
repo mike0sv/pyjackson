@@ -32,6 +32,8 @@ def test_is_collection():
     assert is_collection(Set)
     assert is_collection(Set[str])
     assert not is_collection(Coroutine)
+    assert not is_collection(Dict)
+    assert not is_collection(Dict[str, int])
 
 
 def test_resolve_inner_forward_refs():

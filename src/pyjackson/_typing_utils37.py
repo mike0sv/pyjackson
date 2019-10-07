@@ -14,7 +14,8 @@ _collection_types = [
 
 
 def is_collection37(as_class):
-    return is_generic37(as_class) and any(issubclass(as_class.__origin__, t) for t in _collection_types)
+    return is_generic37(as_class) and any(issubclass(as_class.__origin__, t) for t in _collection_types) and \
+           not issubclass(as_class.__origin__, dict)
 
 
 def resolve_forward_ref37(type_hint, globals__):
