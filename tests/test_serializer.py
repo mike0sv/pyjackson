@@ -33,12 +33,6 @@ class AClassStaticSerializer(StaticSerializer):
         return {'size': len(instance.const_list), 'value': instance.const_list[0] if instance.const_list else None}
 
 
-@make_string
-class AContainer(Comparable):
-    def __init__(self, test: AClass):
-        self.test = test
-
-
 class BClass(Comparable):
     def __init__(self, not_typehinted):
         self.not_typehinted = not_typehinted
@@ -114,6 +108,11 @@ class ChildSizedTestType(AbstractTestType, Serializer):
 
 
 def test_static_serializer():
+    @make_string
+    class AContainer(Comparable):
+        def __init__(self, test: AClass):
+            self.test = test
+
     t1 = AContainer(AClass([5 for _ in range(10)]))
 
     serde_and_compare(t1)

@@ -79,3 +79,20 @@ def test_non_data_descriptor():
     ser1 = ASerializer('a')
 
     assert ser1.no_data_descriptor == 'a'
+
+
+def test_instance_class_and_static_method_access():
+    class MySerializer(Serializer):
+        def method(self):
+            return self.clsmethod('a') + self.sttcmethod('b')
+
+        @classmethod
+        def clsmethod(cls, arg1):
+            return arg1
+
+        @staticmethod
+        def sttcmethod(arg1):
+            return arg1
+
+    obj = MySerializer()
+    assert obj.method() == 'ab'

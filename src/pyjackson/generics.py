@@ -163,6 +163,8 @@ def _transform_to_class_methods(cls):
 
             if name.startswith('__'):
                 metaclass_attrs[name] = attr
+            elif isinstance(defining_class.__dict__[name], staticmethod):
+                class_attrs[name] = attr
             else:
                 class_attrs[name] = classmethod(attr)
         elif inspect.isdatadescriptor(attr):
@@ -184,16 +186,18 @@ class Serializer(metaclass=_SerializerMeta):
     """
     real_type = None  # type: Type
 
-    def __init__(self):
-        pass
-
     @_type_cache
     def __new__(cls, **kwargs):
+        has_init = issubclass(_get_defining_class(cls, cls.__init__), Serializer)
         if getattr(cls, '_dynamic', False):
-            cls.__init__(cls, **kwargs)
+            if has_init:
+                cls.__init__(cls, **kwargs)
             _transform_to_class_methods(cls)
             return cls
-        kwargs_str = flat_dict_repr(kwargs, func_order=cls.__init__)
+        if has_init:
+            kwargs_str = flat_dict_repr(kwargs, func_order=cls.__init__)
+        else:
+            kwargs_str = ''
 
         metaclass = type(cls)
         metaclass_name = '{}Metaclass[{}]'.format(cls.__name__, kwargs_str)

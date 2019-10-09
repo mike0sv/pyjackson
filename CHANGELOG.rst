@@ -1,6 +1,11 @@
 Changelog
 =========
 
+0.0.9 (2019-10-09)
+-------------------------
+
+* Removed empty Serialzier __init__ method and fix for staticmethod in serializer
+
 0.0.8 (2019-10-07)
 -------------------------
 
