@@ -104,7 +104,8 @@ def type_field(field_name, position: Position = Position.INSIDE):
             SubtypeRegisterMixin._subtypes[subtype_name] = cls
 
     def class_wrap(root_cls):
-        wrapped = type('Registering{}'.format(root_cls.__name__), (root_cls, SubtypeRegisterMixin), {})
+        wrapped = type(root_cls.__name__, (root_cls, SubtypeRegisterMixin), {})
+        wrapped.__module__ = root_cls.__module__
         setattr(wrapped, TYPE_FIELD_NAME_FIELD_ROOT, wrapped)
         return wrapped
 

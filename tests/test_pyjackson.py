@@ -140,3 +140,8 @@ def test_explicit_child():
     obj = SecondChild('aaa')
 
     serde_and_compare(obj, SecondChild, {'field': 'aaa'}, check_payload=False)
+
+
+def test_parent__name():
+    assert Parent.__name__ == 'Parent'
+    assert Parent.__module__ == 'tests.test_pyjackson'
