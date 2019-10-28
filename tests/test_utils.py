@@ -1,8 +1,8 @@
-from typing import Dict, List, Tuple, Union
+from typing import Dict, List, NamedTuple, Tuple, Union
 
 import pytest
 
-from pyjackson.core import Field, Position, Unserializable
+from pyjackson.core import Field, Position, Signature, Unserializable
 from pyjackson.decorators import as_list, type_field
 from pyjackson.errors import PyjacksonError
 from pyjackson.generics import StaticSerializer
@@ -228,7 +228,7 @@ def test_is_init_type_hinted_and_has_correct_attrs():
     assert not is_init_type_hinted_and_has_correct_attrs(BadNoAttr(1))
 
 
-def test_is_serializable():
+def test_is_serializable__init_hints():
     class Ser:
         def __init__(self, a: int):
             self.a = a
@@ -236,6 +236,11 @@ def test_is_serializable():
     class Unser(Unserializable):
         pass
 
+    assert is_serializable(Ser(1))
+    assert not is_serializable(Unser())
+
+
+def test_is_serializable__external():
     class ExternalClass:
         def __init__(self, a):
             self.b = a
@@ -255,11 +260,16 @@ def test_is_serializable():
         def __init__(self, a):
             self.b = a
 
-    assert is_serializable(Ser(1))
-    assert not is_serializable(Unser())
-
     assert is_serializable(ExternalClass(1))
     assert not is_serializable(ExternalNoSerializer(1))
+
+
+def test_is_serializable__named_tuple():
+    ntuple = NamedTuple('ntuple', [('field1', str)])
+
+    assert is_serializable(ntuple('aaa'))
+
+    assert is_serializable(Signature([Field('aaa', int, False)], Field(None, int, False)))
 
 
 def test_is_hierarchy_root():

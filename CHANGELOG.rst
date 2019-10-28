@@ -1,6 +1,16 @@
 Changelog
 =========
 
+0.0.11 (2019-10-28)
+-------------------------
+
+* Fixed is_serializable for Signature
+
+0.0.10 (2019-10-16)
+-------------------------
+
+* Set class name and module of hierarchy root to be valid
+
 0.0.9 (2019-10-09)
 -------------------------
 

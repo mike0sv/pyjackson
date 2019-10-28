@@ -36,22 +36,27 @@ def test_is_collection():
     assert not is_collection(Dict[str, int])
 
 
-def test_resolve_inner_forward_refs():
+def test_resolve_inner_forward_refs__list():
     def list_arg(a: List['A']): pass
 
+    ann = list_arg.__annotations__['a']
+    list_col = resolve_inner_forward_refs(ann, list_arg)
+    assert list_col == List[A]
+
+
+def test_resolve_inner_forward_refs__set():
     def set_arg(a: Set['A']): pass
 
-    def tuple_arg(a: Tuple['A', 'B', int]): pass
-
-    def tp(f):
-        return f.__annotations__['a']
-
-    list_col = resolve_inner_forward_refs(tp(list_arg), list_arg)
-    assert list_col == List[A]
-    set_col = resolve_inner_forward_refs(tp(set_arg), set_arg)
+    ann = set_arg.__annotations__['a']
+    set_col = resolve_inner_forward_refs(ann, set_arg)
     assert set_col == Set[A]
 
-    tuple_col = resolve_inner_forward_refs(tp(tuple_arg), tuple_arg)
+
+def test_resolve_inner_forward_refs__tuple():
+    def tuple_arg(a: Tuple['A', 'B', int]): pass
+
+    ann = tuple_arg.__annotations__['a']
+    tuple_col = resolve_inner_forward_refs(ann, tuple_arg)
     assert tuple_col == Tuple[A, B, int]
 
 

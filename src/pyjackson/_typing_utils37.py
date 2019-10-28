@@ -20,13 +20,14 @@ def is_collection37(as_class):
 
 def resolve_forward_ref37(type_hint, globals__):
     if isinstance(type_hint, typing.ForwardRef):
-        type_hint = type_hint._evaluate(globals__, {})
+        type_hint = type_hint._evaluate(globals__, None)
     return type_hint
 
 
 def resolve_inner_forward_refs37(type_hint, f):
     if is_generic37(type_hint):
-        args = [resolve_forward_ref37(a, f.__globals__) for a in type_hint.__args__]
+        glob = getattr(f, '__globals__', {})
+        args = [resolve_forward_ref37(a, glob) for a in type_hint.__args__]
         type_hint = type_hint.copy_with(tuple(args))
     return type_hint
 

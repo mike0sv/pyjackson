@@ -11,13 +11,14 @@ def is_collection35(as_class):
 
 def resolve_forward_ref35(type_hint, globals__):
     if isinstance(type_hint, typing._ForwardRef):
-        type_hint = type_hint._eval_type(globals__, {})
+        type_hint = type_hint._eval_type(globals__, None)
     return type_hint
 
 
 def resolve_inner_forward_refs35(type_hint, f):
     if is_generic35(type_hint):
-        args = [resolve_forward_ref35(a, f.__globals__) for a in type_hint.__args__]
+        glob = getattr(f, '__globals__', {})
+        args = [resolve_forward_ref35(a, glob) for a in type_hint.__args__]
         type_hint = type_hint.__origin__[tuple(args)]
     return type_hint
 
