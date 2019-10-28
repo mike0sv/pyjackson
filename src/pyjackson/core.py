@@ -40,7 +40,7 @@ class Comparable:
 
 
 class Field(Comparable):
-    def __init__(self, name, type, has_default, default=None):
+    def __init__(self, name: str, type: type, has_default: bool, default: typing.Any = None):
         self.name = name
         self.type = type
         self.has_default = has_default
