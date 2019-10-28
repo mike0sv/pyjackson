@@ -271,8 +271,10 @@ def test_is_serializable__named_tuple():
 
     assert is_serializable(Signature([Field('aaa', int, False)], Field(None, int, False)))
 
+
 def test_is_serializable__field():
     assert is_serializable(Field('aaa', int, False))
+
 
 def test_is_hierarchy_root():
     @type_field('aaaa')
