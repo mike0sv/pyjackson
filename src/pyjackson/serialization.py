@@ -1,6 +1,6 @@
 from typing import Hashable, List, Set, Tuple, Type
 
-from pyjackson.core import BUILTIN_TYPES, Position
+from pyjackson.core import BUILTIN_TYPES, FIELD_MAPPING_NAME_FIELD, Position
 from pyjackson.errors import SerializationError, UnserializableError
 from pyjackson.generics import SERIALIZER_MAPPING, Serializer, SerializerType, StaticSerializer
 from pyjackson.utils import (get_class_fields, get_type_field_name, has_serializer, is_aslist, is_serializable,
@@ -14,6 +14,8 @@ def _serialize_to_dict(cls, obj):
         name = f.name
         field = getattr(obj, name)
         if field is not None:
+            if hasattr(cls, FIELD_MAPPING_NAME_FIELD):
+                name = getattr(cls, FIELD_MAPPING_NAME_FIELD).get(name, name)
             result[name] = serialize(field, f.type)
 
     if type_field_position_is(cls, Position.INSIDE):

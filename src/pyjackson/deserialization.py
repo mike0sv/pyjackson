@@ -1,6 +1,6 @@
 from typing import Hashable, Type
 
-from pyjackson.core import BUILTIN_TYPES, Field, Position
+from pyjackson.core import BUILTIN_TYPES, FIELD_MAPPING_NAME_FIELD, Field, Position
 from pyjackson.errors import DeserializationError
 from pyjackson.generics import SERIALIZER_MAPPING, Serializer, SerializerType, StaticSerializer
 from pyjackson.utils import (get_class_fields, get_collection_internal_type, get_collection_type, get_mapping_types,
@@ -37,16 +37,19 @@ def _construct_from_list(obj, as_class):
 def _construct_from_dict(obj, as_class):
     kwargs = {}
     for f in get_class_fields(as_class):
-        field_name = f.name
+        name = f.name
         field_type = _get_field_type(f, obj)
 
-        if field_name not in obj:
+        if hasattr(as_class, FIELD_MAPPING_NAME_FIELD):
+            name = getattr(as_class, FIELD_MAPPING_NAME_FIELD).get(name, name)
+
+        if name not in obj:
             if f.has_default:
                 continue
             else:
-                raise ValueError("Type {} has required argument {}".format(as_class, field_name))
+                raise ValueError("Type {} has required argument {}".format(as_class, name))
         else:
-            kwargs[field_name] = deserialize(obj[field_name], field_type)
+            kwargs[f.name] = deserialize(obj[name], field_type)
     return as_class(**kwargs)
 
 

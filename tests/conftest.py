@@ -39,7 +39,7 @@ def serde_and_compare(obj, obj_type=None, true_payload=None, check_payload=True)
     payload = pyjackson.serialize(obj, obj_type)
     if true_payload is not None:
         if check_payload:
-            assert true_payload == payload
+            assert payload == true_payload
         payload = true_payload
     new_obj = pyjackson.deserialize(payload, obj_type)
     if check_subtype:

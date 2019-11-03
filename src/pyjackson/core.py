@@ -6,6 +6,7 @@ CLASS_SPECS_CACHE = dict()
 TYPE_FIELD_NAME_FIELD_NAME = '_type_field_name'
 TYPE_FIELD_NAME_FIELD_POSITION = '_type_field_position'
 TYPE_FIELD_NAME_FIELD_ROOT = '_type_field_root'
+FIELD_MAPPING_NAME_FIELD = '_field_mapping'
 TYPE_AS_LIST = '_type_as_list'
 BUILTIN_TYPES = {
     int, float, str, type(None), bool, list, dict

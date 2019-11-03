@@ -1,8 +1,9 @@
 import typing
+from copy import copy
 
 from pyjackson import utils
-from pyjackson.core import (TYPE_AS_LIST, TYPE_FIELD_NAME_FIELD_NAME, TYPE_FIELD_NAME_FIELD_POSITION,
-                            TYPE_FIELD_NAME_FIELD_ROOT, Position)
+from pyjackson.core import (FIELD_MAPPING_NAME_FIELD, TYPE_AS_LIST, TYPE_FIELD_NAME_FIELD_NAME,
+                            TYPE_FIELD_NAME_FIELD_POSITION, TYPE_FIELD_NAME_FIELD_ROOT, Position)
 from pyjackson.generics import _register_serializer
 
 
@@ -121,3 +122,21 @@ def real_types(*types):
         return cls
 
     return dec
+
+
+def rename_fields(**field_mapping):
+    """
+    Change name of fields in payload. This behavior is inheritable and overridable for child classes
+
+    :param field_mapping: str-str mapping of field name (from constructor) to field name in payload
+    """
+    def decorator(cls):
+        if hasattr(cls, FIELD_MAPPING_NAME_FIELD):
+            mapping, new_mapping = copy(getattr(cls, FIELD_MAPPING_NAME_FIELD)), field_mapping
+            mapping.update(new_mapping)
+        else:
+            mapping = field_mapping
+        setattr(cls, FIELD_MAPPING_NAME_FIELD, mapping)
+        return cls
+
+    return decorator
