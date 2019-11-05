@@ -1,5 +1,5 @@
 from pyjackson.core import Comparable
-from pyjackson.decorators import rename_fields
+from pyjackson.decorators import camel_case, rename_fields
 from tests.conftest import serde_and_compare
 
 
@@ -49,3 +49,16 @@ def test_rename__child_extend():
     obj = ChildExtend('aaaa', 'bbbb')
 
     serde_and_compare(obj, true_payload={'field_1': 'aaaa', 'field_2': 'bbbb'})
+
+
+@camel_case
+class CamelCase(Comparable):
+    def __init__(self, field_one: str, field_two: str):
+        self.field_one = field_one
+        self.field_two = field_two
+
+
+def test_camel_case():
+    obj = CamelCase('a', 'b')
+
+    serde_and_compare(obj, true_payload={'fieldOne': 'a', 'fieldTwo': 'b'})

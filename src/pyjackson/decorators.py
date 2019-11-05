@@ -5,6 +5,7 @@ from pyjackson import utils
 from pyjackson.core import (FIELD_MAPPING_NAME_FIELD, TYPE_AS_LIST, TYPE_FIELD_NAME_FIELD_NAME,
                             TYPE_FIELD_NAME_FIELD_POSITION, TYPE_FIELD_NAME_FIELD_ROOT, Position)
 from pyjackson.generics import _register_serializer
+from pyjackson.utils import get_class_fields
 
 
 class cached_property:
@@ -130,6 +131,7 @@ def rename_fields(**field_mapping):
 
     :param field_mapping: str-str mapping of field name (from constructor) to field name in payload
     """
+
     def decorator(cls):
         if hasattr(cls, FIELD_MAPPING_NAME_FIELD):
             mapping, new_mapping = copy(getattr(cls, FIELD_MAPPING_NAME_FIELD)), field_mapping
@@ -140,3 +142,15 @@ def rename_fields(**field_mapping):
         return cls
 
     return decorator
+
+
+def camel_case(cls):
+    """
+    Change snake_case field names to camelCase names
+    """
+    fields = get_class_fields(cls)
+    rename = {}
+    for f in fields:
+        tokens = f.name.split('_')
+        rename[f.name] = tokens[0] + ''.join(t.capitalize() for t in tokens[1:])
+    return rename_fields(**rename)(cls)
