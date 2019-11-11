@@ -3,6 +3,6 @@ from .helpers import deserialize, dump, dumps, load, loads, read, serialize, wri
 
 __all__ = ['builtin_types', 'deserialize', 'dump', 'dumps', 'load', 'loads', 'read', 'serialize', 'write']
 
-__version__ = '0.0.14'
+__version__ = '0.0.15'
 __author__ = 'Mikhail Sveshnikov'
 __email__ = 'mike0sv@gmail.com'

@@ -29,7 +29,7 @@ project = 'PyJackson'
 year = '2019'
 author = 'Mikhail Sveshnikov'
 copyright = '{0}, {1}'.format(year, author)
-version = release = '0.0.14'
+version = release = '0.0.15'
 
 pygments_style = 'trac'
 templates_path = ['.']
