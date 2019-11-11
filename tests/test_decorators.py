@@ -1,4 +1,4 @@
-from pyjackson.decorators import cached_property, make_string
+from pyjackson.decorators import cached_property, make_string, type_field
 
 
 def test_make_string():
@@ -10,7 +10,7 @@ def test_make_string():
     assert str(AClass('value')) == 'AClass(field=value)'
 
 
-def test_cached_property_laziness():
+def test_cached_property__laziness():
     executed = [0]
 
     class WithCachedProperty:
@@ -32,7 +32,7 @@ def test_cached_property_laziness():
     assert executed[0] == 1
 
 
-def test_cached_property_instance_uniqueness():
+def test_cached_property__instance_uniqueness():
     executed = [0]
 
     class WithCachedProperty:
@@ -46,3 +46,18 @@ def test_cached_property_instance_uniqueness():
 
     id(WithCachedProperty().prop)
     assert executed[0] == 2
+
+
+def test_type_filed__metadata():
+    class RootClass:
+        """
+        docstring
+        """
+        pass
+
+    decorated = type_field('type')(RootClass)
+
+    assert decorated.__module__ == RootClass.__module__
+    assert decorated.__name__ == RootClass.__name__
+    assert decorated.__doc__ == RootClass.__doc__
+    assert decorated.__qualname__ == RootClass.__qualname__

@@ -108,6 +108,8 @@ def type_field(field_name, position: Position = Position.INSIDE):
     def class_wrap(root_cls):
         wrapped = type(root_cls.__name__, (root_cls, SubtypeRegisterMixin), {})
         wrapped.__module__ = root_cls.__module__
+        wrapped.__doc__ = root_cls.__doc__
+        wrapped.__qualname__ = root_cls.__qualname__
         setattr(wrapped, TYPE_FIELD_NAME_FIELD_ROOT, wrapped)
         return wrapped
 

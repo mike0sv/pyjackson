@@ -1,6 +1,11 @@
 Changelog
 =========
 
+0.0.15 (2019-11-11)
+-------------------------
+
+* Set class docstring and qualname of hierarchy root to be valid
+
 0.0.14 (2019-11-05)
 -------------------------
 
