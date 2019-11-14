@@ -1,6 +1,11 @@
 Changelog
 =========
 
+0.0.16 (2019-11-15)
+-------------------------
+
+* Raise on subtype resolve error and fix for camel case forward ref resolving
+
 0.0.15 (2019-11-11)
 -------------------------
 

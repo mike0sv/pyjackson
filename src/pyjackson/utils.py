@@ -6,7 +6,7 @@ from pyjackson import generics
 from pyjackson.core import (BUILTIN_TYPES, CLASS_SPECS_CACHE, TYPE_AS_LIST, TYPE_FIELD_NAME_FIELD_NAME,
                             TYPE_FIELD_NAME_FIELD_POSITION, TYPE_FIELD_NAME_FIELD_ROOT, Comparable, Field, Position,
                             Signature, Unserializable)
-from pyjackson.errors import PyjacksonError
+from pyjackson.errors import DeserializationError, PyjacksonError
 
 from ._typing_utils import (get_collection_type, is_collection, is_generic, is_mapping, is_tuple, is_union,
                             resolve_inner_forward_refs)
@@ -175,6 +175,8 @@ def get_type_field_name(cls):
 def resolve_subtype(cls: type, obj):
     # obj must be parent object if position == OUTSIDE
     type_alias = get_subtype_alias(cls, obj)
+    if type_alias not in cls._subtypes:
+        raise DeserializationError(f'Unknown subtype {type_alias} of type {cls.__name__}')
     return cls._subtypes[type_alias]
 
 
