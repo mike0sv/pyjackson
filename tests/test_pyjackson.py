@@ -1,4 +1,4 @@
-from typing import Dict, List, Set, Tuple, Union
+from typing import Any, Dict, List, Set, Tuple, Union
 
 import pytest
 
@@ -145,3 +145,21 @@ def test_explicit_child():
 def test_parent__name():
     assert Parent.__name__ == 'Parent'
     assert Parent.__module__ == 'tests.test_pyjackson'
+
+
+def test_any():
+    class WithAny(Comparable):
+        def __init__(self, field: Any):
+            self.field = field
+
+    obj = WithAny(1)
+
+    serde_and_compare(obj, true_payload={'field': 1})
+
+    obj = WithAny('1')
+
+    serde_and_compare(obj, true_payload={'field': '1'})
+
+    obj = WithAny({'a', 1})
+
+    serde_and_compare(obj, true_payload={'field': {'a', 1}})

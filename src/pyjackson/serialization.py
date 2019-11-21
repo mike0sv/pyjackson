@@ -1,4 +1,4 @@
-from typing import Hashable, List, Set, Tuple, Type
+from typing import Any, Hashable, List, Set, Tuple, Type
 
 from pyjackson.core import BUILTIN_TYPES, FIELD_MAPPING_NAME_FIELD, Position
 from pyjackson.errors import SerializationError, UnserializableError
@@ -89,6 +89,8 @@ def serialize(obj, as_class: SerializerType = None):
 
     :return: JSON-compatible object
     """
+    if as_class is Any:
+        return obj
     if not is_serializable(obj):
         raise UnserializableError(obj)
 

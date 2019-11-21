@@ -1,4 +1,4 @@
-from typing import Hashable, Type
+from typing import Any, Hashable, Type
 
 from pyjackson.core import BUILTIN_TYPES, FIELD_MAPPING_NAME_FIELD, Field, Position
 from pyjackson.errors import DeserializationError
@@ -86,7 +86,9 @@ def deserialize(obj, as_class: SerializerType):
 
     :raise: DeserializationError
     """
-    if is_generic(as_class):
+    if as_class is Any:
+        return obj
+    elif is_generic(as_class):
         if is_mapping(as_class):
             key_type, value_type = get_mapping_types(as_class)
             if key_type != str:
