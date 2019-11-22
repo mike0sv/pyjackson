@@ -85,7 +85,8 @@ def type_field(field_name, position: Position = Position.INSIDE):
 
         def __init_subclass__(cls, **kwargs):
             super(SubtypeRegisterMixin, cls).__init_subclass__(**kwargs)
-            subtype_name = getattr(cls, field_name, None)
+            subtype_name = cls.__dict__.get(field_name, f'{cls.__module__}.{cls.__name__}')
+
             if subtype_name is None:
                 return
 

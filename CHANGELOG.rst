@@ -1,6 +1,11 @@
 Changelog
 =========
 
+0.0.18 (2019-11-22)
+-------------------------
+
+* Added support for full class path in type field (with importing logic)
+
 0.0.17 (2019-11-21)
 -------------------------
 

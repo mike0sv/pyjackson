@@ -3,9 +3,14 @@ import os
 import pytest
 
 import pyjackson
-from pyjackson.decorators import make_string
+from pyjackson.decorators import make_string, type_field
 from pyjackson.generics import Serializer
 from pyjackson.utils import Comparable, is_generic, issubclass_safe
+
+
+@type_field('type')
+class RootClass:
+    type = None
 
 
 @pytest.fixture

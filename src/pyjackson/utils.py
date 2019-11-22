@@ -1,6 +1,7 @@
 import inspect
 import typing
 from copy import copy
+from importlib import import_module
 
 from pyjackson import generics
 from pyjackson.core import (BUILTIN_TYPES, CLASS_SPECS_CACHE, TYPE_AS_LIST, TYPE_FIELD_NAME_FIELD_NAME,
@@ -175,9 +176,17 @@ def get_type_field_name(cls):
 def resolve_subtype(cls: type, obj):
     # obj must be parent object if position == OUTSIDE
     type_alias = get_subtype_alias(cls, obj)
-    if type_alias not in cls._subtypes:
+    if '.' in type_alias:
+        try:
+            split = type_alias.split('.')
+            module = '.'.join(split[:-1])
+            import_module(module)
+        except ImportError:
+            pass
+    subtype = cls._subtypes.get(type_alias, None)
+    if subtype is None:
         raise DeserializationError(f'Unknown subtype {type_alias} of type {cls.__name__}')
-    return cls._subtypes[type_alias]
+    return subtype
 
 
 def get_mapping_types(as_class: typing.Type):

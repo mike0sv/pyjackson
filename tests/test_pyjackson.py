@@ -3,11 +3,12 @@ from typing import Any, Dict, List, Set, Tuple, Union
 import pytest
 
 import pyjackson
+from pyjackson import deserialize
 from pyjackson.core import Unserializable
 from pyjackson.decorators import make_string, type_field
 from pyjackson.errors import UnserializableError
 from pyjackson.utils import Comparable
-from tests.conftest import serde_and_compare
+from tests.conftest import RootClass, serde_and_compare
 
 
 @make_string
@@ -163,3 +164,10 @@ def test_any():
     obj = WithAny({'a', 1})
 
     serde_and_compare(obj, true_payload={'field': {'a', 1}})
+
+
+def test_type_hierarchy__type_import():
+    obj = deserialize({'type': 'tests.not_imported_directly.ChildClass', 'field': 'aaa'}, RootClass)
+    assert isinstance(obj, RootClass)
+    assert obj.__class__.__name__ == 'ChildClass'
+    assert obj.field == 'aaa'
