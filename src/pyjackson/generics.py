@@ -4,6 +4,7 @@ from abc import abstractmethod
 from functools import lru_cache, wraps
 from typing import Hashable, Type, Union
 
+from pyjackson.core import TYPE_FIELD_NAME_FIELD_NAME
 from pyjackson.utils import flat_dict_repr, is_descriptor, turn_args_to_kwargs
 
 SERIALIZER_MAPPING = dict()
@@ -204,8 +205,12 @@ class Serializer(metaclass=_SerializerMeta):
         new_metaclass = type(metaclass_name, (metaclass,), {'_dynamic': True, '_parent_metaclass': metaclass})
 
         type_name = '{}[{}]'.format(cls.__name__, kwargs_str)
-        new_type = new_metaclass(type_name, (cls,),
-                                 {'_dynamic': True, '_parent_class': cls, '_init_args': tuple(kwargs.keys())})
+        __dict__ = {'_dynamic': True, '_parent_class': cls, '_init_args': tuple(kwargs.keys())}
+        if hasattr(cls, TYPE_FIELD_NAME_FIELD_NAME):
+            type_field_name = getattr(cls, TYPE_FIELD_NAME_FIELD_NAME)
+            type_field_value = getattr(cls, type_field_name)
+            __dict__[type_field_name] = type_field_value
+        new_type = new_metaclass(type_name, (cls,), __dict__)
         instance = new_type(**kwargs)
         return instance
 
