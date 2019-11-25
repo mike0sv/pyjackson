@@ -3,7 +3,7 @@ from typing import Any, Dict, List, Set, Tuple, Union
 import pytest
 
 import pyjackson
-from pyjackson import deserialize
+from pyjackson import deserialize, serialize
 from pyjackson.core import Unserializable
 from pyjackson.decorators import make_string, type_field
 from pyjackson.errors import UnserializableError
@@ -167,7 +167,12 @@ def test_any():
 
 
 def test_type_hierarchy__type_import():
-    obj = deserialize({'type': 'tests.not_imported_directly.ChildClass', 'field': 'aaa'}, RootClass)
+    payload = {'type': 'tests.not_imported_directly.ChildClass', 'field': 'aaa'}
+    obj = deserialize(payload, RootClass)
     assert isinstance(obj, RootClass)
     assert obj.__class__.__name__ == 'ChildClass'
     assert obj.field == 'aaa'
+
+    new_payload = serialize(obj)
+
+    assert new_payload == payload

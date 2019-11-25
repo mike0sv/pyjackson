@@ -87,6 +87,7 @@ def type_field(field_name, position: Position = Position.INSIDE, allow_reregistr
         def __init_subclass__(cls, **kwargs):
             super(SubtypeRegisterMixin, cls).__init_subclass__(**kwargs)
             subtype_name = cls.__dict__.get(field_name, f'{cls.__module__}.{cls.__name__}')
+            setattr(cls, field_name, subtype_name)  # set default type name
 
             if subtype_name is None:
                 return
