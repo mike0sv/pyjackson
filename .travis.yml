@@ -32,18 +32,25 @@ install:
   - easy_install --version
   - pip --version
   - tox --version
-script:
-  - tox -v
+jobs:
+    include:
+        -   script: tox -v
+            stage: test
+        -   script: skip
+            stage: deploy
+            deploy: &pypi
+                provider: pypi
+                skip_existing: true
+                user: "__token__"
+                password: $PYPI_TOKEN
+                on:
+                    tags: true
+stages:
+    - test
+    - deply
 after_failure:
   - more .tox/log/* | cat
   - more .tox/*/log/* | cat
-deploy:
-   provider: pypi
-   skip_existing: true
-   user: "__token__"
-   password: $PYPI_TOKEN
-   on:
-       tags: true
 notifications:
   email:
     on_success: never
