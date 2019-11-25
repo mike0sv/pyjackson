@@ -68,13 +68,14 @@ def as_list(cls: typing.Type):
     return cls
 
 
-def type_field(field_name, position: Position = Position.INSIDE):
+def type_field(field_name, position: Position = Position.INSIDE, allow_reregistration=False):
     """Class decorator for polymorphic hierarchies to define class field name, where subclass's type alias will be stored
     Use it on hierarchy root class, add class field  with defined name to any subclasses
     The same field name will be used during deserialization
 
     :param field_name: class field name to put alias for type
     :param position: where to put type alias
+    :param allow_reregistration: whether to allow reregistration of same alias or throw error
     """
 
     class SubtypeRegisterMixin:
@@ -102,7 +103,7 @@ def type_field(field_name, position: Position = Position.INSIDE):
                     if issubclass(existing, Serializer) and issubclass(cls, existing):
                         # raise if cls is child of existing and does not declare type alias
                         raise ValueError(msg)
-                elif existing != cls:  # it's not serializer and different class
+                elif existing != cls and not allow_reregistration:  # it's not serializer and different class
                     raise ValueError(msg)
             SubtypeRegisterMixin._subtypes[subtype_name] = cls
 
