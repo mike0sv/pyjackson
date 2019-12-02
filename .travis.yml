@@ -33,6 +33,7 @@ matrix:
                 skip_existing: true
                 user: "__token__"
                 password: $PYPI_TOKEN
+                distributions: "sdist bdist_wheel"
                 on:
                     tags: true
 before_install:
