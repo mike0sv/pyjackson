@@ -166,7 +166,7 @@ def get_subtype_alias(cls, obj):
 
 
 def has_subtype_alias(cls, obj):
-    return is_aslist(cls) or get_type_field_name(cls) in obj
+    return is_aslist(cls) or (isinstance(obj, dict) and get_type_field_name(cls) in obj)
 
 
 def get_type_field_name(cls):

@@ -5,7 +5,7 @@ from typing import List
 import pytest
 
 from pyjackson import deserialize
-from pyjackson.decorators import make_string
+from pyjackson.decorators import make_string, type_field
 from pyjackson.generics import Serializer, StaticSerializer
 from pyjackson.serialization import SerializationError, serialize
 from pyjackson.utils import Comparable
@@ -246,3 +246,30 @@ def test_relation(relation, o1, o2, ref1, ref2, skip: bool):
         with pytest.raises(type(exception)):
             relation(o1, o2)
             pytest.fail(msg)
+
+
+def test_primitive_serializer():
+    @type_field('type')
+    class Root(Serializer):
+        pass
+
+    class PrimitiveDatasetType(Root):
+        type = 'primitive'
+
+        def __init__(self, ptype: str):
+            self.ptype = ptype
+
+        @property
+        def to_type(self):
+            import builtins
+            return getattr(builtins, self.ptype)
+
+        def deserialize(self, obj):
+            return self.to_type(obj)
+
+        def serialize(self, instance):
+            return instance
+
+    IntSerializer = PrimitiveDatasetType('int')
+
+    serde_and_compare(1, IntSerializer)
