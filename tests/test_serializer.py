@@ -200,7 +200,7 @@ def create_object_quads():
         (issubclass, SizedTestType, CClass),  # cant hack TestClass to throw TypeError on subclass check
         (issubclass, SizedTestType(2), CClass),
     ]
-    skipping = {(3, 7): skip_python37}
+    skipping = {(3, 7): skip_python37, (3, 8): skip_python37}
 
     args = []
 

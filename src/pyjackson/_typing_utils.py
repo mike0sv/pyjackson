@@ -1,4 +1,5 @@
 import sys
+import warnings
 
 _major, _minor, *_ = sys.version_info
 
@@ -18,7 +19,7 @@ if _minor < 7:
     else:
         from ._typing_utils36 import is_union36 as is_union, is_collection36 as is_collection
 
-elif _minor == 7:
+elif _minor <= 8:
     from ._typing_utils37 import (is_collection37 as is_collection,
                                   is_generic37 as is_generic,
                                   is_mapping37 as is_mapping,
@@ -27,8 +28,9 @@ elif _minor == 7:
                                   resolve_forward_ref37 as resolve_forward_ref,
                                   resolve_inner_forward_refs37 as resolve_inner_forward_refs,
                                   is_tuple37 as is_tuple)
+
 else:
-    raise Exception('Pyjackson works only with python version <= 3.7 yet(')
+    warnings.warn('Pyjackson was not tested for python version > 3.8')
 
 __all__ = [
     'resolve_inner_forward_refs',

@@ -26,6 +26,10 @@ matrix:
                 - TOXENV=py37,codecov,coveralls
             python: '3.7'
             stage: test
+        -   env:
+                - TOXENV=py38,codecov,coveralls
+            python: '3.8'
+            stage: test
         -   script: skip
             stage: deploy
             deploy: &pypi
