@@ -1,6 +1,6 @@
 import itertools
 import sys
-from typing import List
+from typing import Dict, List
 
 import pytest
 
@@ -273,3 +273,11 @@ def test_primitive_serializer():
     IntSerializer = PrimitiveDatasetType('int')
 
     serde_and_compare(1, IntSerializer)
+
+
+def test_dict_keys():
+    class IntDict(Comparable):
+        def __init__(self, d: Dict[int, int]):
+            self.d = d
+
+    serde_and_compare(IntDict({1: 1}))

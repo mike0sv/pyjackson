@@ -11,6 +11,9 @@ TYPE_AS_LIST = '_type_as_list'
 BUILTIN_TYPES = {
     int, float, str, type(None), bool, list, dict
 }
+SERIALIZABLE_DICT_TYPES = {
+    str, int, float
+}
 
 
 class Position(Enum):

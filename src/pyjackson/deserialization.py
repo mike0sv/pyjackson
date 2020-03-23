@@ -1,6 +1,6 @@
 from typing import Any, Hashable, Type
 
-from pyjackson.core import BUILTIN_TYPES, FIELD_MAPPING_NAME_FIELD, Field, Position
+from pyjackson.core import BUILTIN_TYPES, FIELD_MAPPING_NAME_FIELD, SERIALIZABLE_DICT_TYPES, Field, Position
 from pyjackson.errors import DeserializationError
 from pyjackson.generics import SERIALIZER_MAPPING, Serializer, SerializerType, StaticSerializer
 from pyjackson.utils import (get_class_fields, get_collection_internal_type, get_collection_type, get_mapping_types,
@@ -91,10 +91,11 @@ def deserialize(obj, as_class: SerializerType):
     elif is_generic(as_class):
         if is_mapping(as_class):
             key_type, value_type = get_mapping_types(as_class)
-            if key_type != str:
+            if key_type not in SERIALIZABLE_DICT_TYPES:
                 raise DeserializationError(
-                    'mapping key type must be str, not {}. error deserializing {}'.format(key_type, obj))
-            return {k: deserialize(v, value_type) for k, v in obj.items()}
+                    f'mapping key type must be one of {SERIALIZABLE_DICT_TYPES}, not {key_type}. '
+                    f'error deserializing {obj}')
+            return {key_type(k): deserialize(v, value_type) for k, v in obj.items()}
         elif is_tuple(as_class):
             var_length, types = get_tuple_internal_types(as_class)
             if var_length:
