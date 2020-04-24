@@ -1,14 +1,22 @@
 from typing import Coroutine, Dict, List, Set, Tuple, Union
 
 from pyjackson._typing_utils import (get_collection_type, is_collection, is_generic, is_mapping, is_tuple, is_union,
-                                     resolve_forward_ref, resolve_inner_forward_refs)
+                                     resolve_forward_ref, resolve_inner_forward_refs, get_generic_origin,
+                                     is_generic_or_union)
 
 
 def test_is_generic():
     assert is_generic(List)
     assert is_generic(Dict)
     assert is_generic(List[str])
+    assert is_generic(Tuple)
     assert not is_generic(list)
+
+
+def test_is_generic_or_union():
+    assert is_generic_or_union(List[str])
+    assert is_generic_or_union(Union[str, int])
+    assert not is_generic_or_union(list)
 
 
 def test_is_mapping():
@@ -91,3 +99,10 @@ def test_is_tuple():
     assert not is_tuple(List)
     assert not is_tuple(List[str])
     assert not is_tuple(A)
+
+
+def test_get_generic_origin():
+    assert get_generic_origin(List[str]) == List
+    assert get_generic_origin(Dict[str, str]) == Dict
+    assert get_generic_origin(Tuple[str]) == Tuple
+    assert get_generic_origin(Union[str, int]) == Union

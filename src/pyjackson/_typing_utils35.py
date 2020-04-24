@@ -46,3 +46,7 @@ def get_collection_type35(as_class: type):
 
 def is_tuple35(as_class):
     return issubclass(as_class, typing.Tuple)
+
+
+def get_generic_origin35(generic):
+    return generic.__origin__

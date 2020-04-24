@@ -4,7 +4,7 @@ from pydantic import BaseModel
 from pydantic.main import ModelMetaclass
 
 from pyjackson.core import BUILTIN_TYPES, TYPE_FIELD_NAME_FIELD_NAME
-from pyjackson.utils import get_class_fields, is_generic, is_hierarchy_root, is_init_type_hinted
+from pyjackson.utils import get_class_fields, is_generic_or_union, is_hierarchy_root, is_init_type_hinted, get_generic_origin
 
 
 def _new_model(type_, name=None, nested=False, polymorphism=False):
@@ -16,13 +16,13 @@ def _new_model(type_, name=None, nested=False, polymorphism=False):
 
 def _substitute_generics(type_, polymorphism):
     new_types = tuple(_substitute_nested_type(t, polymorphism) for t in type_.__args__)
-    return type_.__origin__[new_types]
+    return get_generic_origin(type_)[new_types]
 
 
 def _substitute_nested_type(type_, polymorphism):
-    if type_ in BUILTIN_TYPES or not is_init_type_hinted(type_):
+    if type_ in BUILTIN_TYPES or (not is_generic_or_union(type_) and not is_init_type_hinted(type_)):
         return type_
-    if is_generic(type_):
+    if is_generic_or_union(type_):
         return _substitute_generics(type_, polymorphism)
 
     return _new_model(type_, nested=True, polymorphism=polymorphism)

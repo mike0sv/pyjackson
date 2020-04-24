@@ -12,7 +12,8 @@ if _minor < 7:
                                   get_collection_type35 as get_collection_type,
                                   resolve_forward_ref35 as resolve_forward_ref,
                                   resolve_inner_forward_refs35 as resolve_inner_forward_refs,
-                                  is_tuple35 as is_tuple)
+                                  is_tuple35 as is_tuple,
+                                  get_generic_origin35 as get_generic_origin)
 
     if _minor == 5:
         from ._typing_utils35 import is_union35 as is_union, is_collection35 as is_collection
@@ -27,10 +28,16 @@ elif _minor <= 8:
                                   get_collection_type37 as get_collection_type,
                                   resolve_forward_ref37 as resolve_forward_ref,
                                   resolve_inner_forward_refs37 as resolve_inner_forward_refs,
-                                  is_tuple37 as is_tuple)
+                                  is_tuple37 as is_tuple,
+                                  get_generic_origin37 as get_generic_origin)
 
 else:
     warnings.warn('Pyjackson was not tested for python version > 3.8')
+
+
+def is_generic_or_union(cls):
+    return is_generic(cls) or is_union(cls)
+
 
 __all__ = [
     'resolve_inner_forward_refs',
@@ -39,5 +46,7 @@ __all__ = [
     'is_mapping', 'is_union',
     'get_collection_type',
     'resolve_forward_ref',
-    'is_tuple'
+    'is_tuple',
+    'get_generic_origin',
+    'is_generic_or_union'
 ]

@@ -46,3 +46,8 @@ def get_collection_type37(as_class: type):
 
 def is_tuple37(as_class):
     return isinstance(as_class, typing._GenericAlias) and as_class.__origin__ is tuple
+
+
+def get_generic_origin37(cls):
+    name = cls._name
+    return getattr(typing, name) if name is not None else cls.__origin__

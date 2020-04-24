@@ -10,7 +10,7 @@ from pyjackson.core import (BUILTIN_TYPES, CLASS_SPECS_CACHE, TYPE_AS_LIST, TYPE
 from pyjackson.errors import DeserializationError, PyjacksonError
 
 from ._typing_utils import (get_collection_type, is_collection, is_generic, is_mapping, is_tuple, is_union,
-                            resolve_inner_forward_refs)
+                            resolve_inner_forward_refs, get_generic_origin, is_generic_or_union)
 
 __all__ = ['resolve_inner_forward_refs', 'is_generic', 'is_mapping', 'is_union', 'is_collection', 'get_collection_type',
            'flat_dict_repr', 'is_aslist', 'get_function_fields', 'get_type_field_name',
@@ -19,7 +19,7 @@ __all__ = ['resolve_inner_forward_refs', 'is_generic', 'is_mapping', 'is_union',
            'turn_args_to_kwargs', 'has_subtype_alias', 'has_hierarchy', 'issubclass_safe', 'is_descriptor',
            'has_serializer', 'is_init_type_hinted_and_has_correct_attrs', 'is_serializable', 'is_hierarchy_root',
            'type_field_position_is', 'resolve_subtype', 'Comparable', 'get_tuple_internal_types', 'is_tuple',
-           'is_init_type_hinted']
+           'is_init_type_hinted', 'get_generic_origin', 'is_generic_or_union']
 
 
 def flat_dict_repr(d: dict, func_order=None, sep=',', braces=False):

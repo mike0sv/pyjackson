@@ -15,3 +15,4 @@ Submodules
    pyjackson.decorators
    pyjackson.errors
    pyjackson.generics
+   pyjackson.pydantic_ext

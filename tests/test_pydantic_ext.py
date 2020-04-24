@@ -1,9 +1,9 @@
-from typing import List
+from typing import List, Union
 
 import pytest
 from pydantic import ValidationError
-from pyjackson.decorators import type_field
 
+from pyjackson.decorators import type_field
 from pyjackson.pydantic_ext import PyjacksonModel
 
 
@@ -282,3 +282,21 @@ def test_autogen_nested_with_polymorphism():
 
     assert isinstance(c, C)
     assert c.c == 5
+
+def test_autogen_nested_union():
+    class B:
+        def __init__(self, b: str):
+            self.b = b
+
+    class A:
+        def __init__(self, a: Union[B, str]):
+            self.a = a
+
+    class AM(PyjacksonModel):
+        __type__ = A
+        __autogen_nested__ = True
+
+    obj = AM.from_data({'a': {'b': 'c'}})
+    assert isinstance(obj, A)
+    assert isinstance(obj.a, B)
+    assert obj.a.b == 'c'
