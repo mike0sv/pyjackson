@@ -18,7 +18,8 @@ __all__ = ['resolve_inner_forward_refs', 'is_generic', 'is_mapping', 'is_union',
            'get_collection_internal_type', 'get_class_field_names', '_argspec_to_fields', 'union_args',
            'turn_args_to_kwargs', 'has_subtype_alias', 'has_hierarchy', 'issubclass_safe', 'is_descriptor',
            'has_serializer', 'is_init_type_hinted_and_has_correct_attrs', 'is_serializable', 'is_hierarchy_root',
-           'type_field_position_is', 'resolve_subtype', 'Comparable', 'get_tuple_internal_types', 'is_tuple']
+           'type_field_position_is', 'resolve_subtype', 'Comparable', 'get_tuple_internal_types', 'is_tuple',
+           'is_init_type_hinted']
 
 
 def flat_dict_repr(d: dict, func_order=None, sep=',', braces=False):
@@ -231,12 +232,19 @@ def has_serializer(as_class: typing.Type):
            not isinstance(as_class, generics.Serializer)
 
 
-def is_init_type_hinted_and_has_correct_attrs(obj):
+def is_init_type_hinted(cls):
     try:
-        class_fields = get_class_fields(type(obj))
+        get_class_fields(cls)
+        return True
     except PyjacksonError:
         return False
-    return all(hasattr(obj, a.name) for a in class_fields)
+
+
+def is_init_type_hinted_and_has_correct_attrs(obj):
+    try:
+        return all(hasattr(obj, a.name) for a in get_class_fields(type(obj)))
+    except PyjacksonError:
+        return False
 
 
 def is_serializable(obj) -> bool:
