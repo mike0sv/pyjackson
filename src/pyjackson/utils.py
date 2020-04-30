@@ -9,8 +9,8 @@ from pyjackson.core import (BUILTIN_TYPES, CLASS_SPECS_CACHE, TYPE_AS_LIST, TYPE
                             Signature, Unserializable)
 from pyjackson.errors import DeserializationError, PyjacksonError
 
-from ._typing_utils import (get_collection_type, is_collection, is_generic, is_mapping, is_tuple, is_union,
-                            resolve_inner_forward_refs, get_generic_origin, is_generic_or_union)
+from ._typing_utils import (get_collection_type, get_generic_origin, is_collection, is_generic, is_generic_or_union,
+                            is_mapping, is_tuple, is_union, resolve_inner_forward_refs)
 
 __all__ = ['resolve_inner_forward_refs', 'is_generic', 'is_mapping', 'is_union', 'is_collection', 'get_collection_type',
            'flat_dict_repr', 'is_aslist', 'get_function_fields', 'get_type_field_name',

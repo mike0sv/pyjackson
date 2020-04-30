@@ -1,10 +1,10 @@
-from typing import List, Union
+from typing import List, Optional, Union
 
 import pytest
-from pydantic import ValidationError
+from pydantic import BaseModel, ValidationError
 
 from pyjackson.decorators import type_field
-from pyjackson.pydantic_ext import PyjacksonModel
+from pyjackson.pydantic_ext import PyjacksonModel, _make_not_optional
 
 
 class PClass:
@@ -155,6 +155,24 @@ def test_force_required():
         PModelReq.from_data({'field1': 'a'})
 
 
+def test_force_required_with_default():
+    class AClass:
+        def __init__(self, field: int = None):
+            self.field = field
+
+    class AModel(PyjacksonModel):
+        __type__ = AClass
+        __force_required__ = ['field']
+
+    data = {'field': 1}
+    obj = AModel.from_data(data)
+    assert isinstance(obj, AClass)
+    assert obj.field == 1
+
+    with pytest.raises(ValidationError):
+        AModel.from_data({})
+
+
 def test_poymorphism_auto():
     @type_field('type')
     class Root:
@@ -283,6 +301,7 @@ def test_autogen_nested_with_polymorphism():
     assert isinstance(c, C)
     assert c.c == 5
 
+
 def test_autogen_nested_union():
     class B:
         def __init__(self, b: str):
@@ -300,3 +319,10 @@ def test_autogen_nested_union():
     assert isinstance(obj, A)
     assert isinstance(obj.a, B)
     assert obj.a.b == 'c'
+
+
+def test_make_not_optional():
+    assert _make_not_optional(int) == int
+    assert _make_not_optional(Optional[str]) == str
+    assert _make_not_optional(Union[int, str]) == Union[int, str]
+    assert _make_not_optional(Union[int, str, None]) == Union[int, str]

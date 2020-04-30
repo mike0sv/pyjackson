@@ -1,8 +1,8 @@
 from typing import Coroutine, Dict, List, Set, Tuple, Union
 
-from pyjackson._typing_utils import (get_collection_type, is_collection, is_generic, is_mapping, is_tuple, is_union,
-                                     resolve_forward_ref, resolve_inner_forward_refs, get_generic_origin,
-                                     is_generic_or_union)
+from pyjackson._typing_utils import (get_collection_type, get_generic_origin, is_collection, is_generic,
+                                     is_generic_or_union, is_mapping, is_tuple, is_union, resolve_forward_ref,
+                                     resolve_inner_forward_refs)
 
 
 def test_is_generic():

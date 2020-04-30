@@ -1,10 +1,11 @@
-from typing import Dict, Set, Type, no_type_check
+from typing import Dict, Optional, Set, Type, Union, no_type_check
 
 from pydantic import BaseModel
 from pydantic.main import ModelMetaclass
 
 from pyjackson.core import BUILTIN_TYPES, TYPE_FIELD_NAME_FIELD_NAME
-from pyjackson.utils import get_class_fields, is_generic_or_union, is_hierarchy_root, is_init_type_hinted, get_generic_origin
+from pyjackson.utils import (get_class_fields, get_generic_origin, is_generic_or_union, is_hierarchy_root,
+                             is_init_type_hinted, is_union, union_args)
 
 
 def _new_model(type_, name=None, nested=False, polymorphism=False):
@@ -26,6 +27,13 @@ def _substitute_nested_type(type_, polymorphism):
         return _substitute_generics(type_, polymorphism)
 
     return _new_model(type_, nested=True, polymorphism=polymorphism)
+
+
+def _make_not_optional(type_):
+    none_type = type(None)
+    if not is_union(type_) or none_type not in union_args(type_):
+        return type_
+    return Union[tuple(t for t in union_args(type_) if t is not none_type)]
 
 
 class PyjacksonModelMetaclass(ModelMetaclass):
@@ -63,6 +71,7 @@ class PyjacksonModelMetaclass(ModelMetaclass):
                 annotations[name] = field_type
             if name in force_required:
                 del namespace[name]
+                annotations[name] = _make_not_optional(annotations[name])
 
         if allow_polymorphism and is_hierarchy_root(__type__):
             field_type_field = getattr(__type__, TYPE_FIELD_NAME_FIELD_NAME)
