@@ -23,7 +23,7 @@ long_description = '%s\n%s' % (re.compile('^.. start-badges.*^.. end-badges', re
 
 setup(
     name='pyjackson',
-    version='0.0.25',
+    version='0.0.26',
     license='Apache-2.0',
     description='PyJackson is a serialization library based on type hinting ',
     long_description=long_description,
