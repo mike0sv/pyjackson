@@ -1,7 +1,7 @@
 from typing import List, Optional, Union
 
 import pytest
-from pydantic import BaseModel, ValidationError
+from pydantic import ValidationError
 
 from pyjackson.decorators import type_field
 from pyjackson.pydantic_ext import PyjacksonModel, _make_not_optional

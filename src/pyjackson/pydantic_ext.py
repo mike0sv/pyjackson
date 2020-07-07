@@ -1,4 +1,4 @@
-from typing import Dict, Optional, Set, Type, Union, no_type_check
+from typing import Dict, Set, Type, Union, no_type_check
 
 from pydantic import BaseModel
 from pydantic.main import ModelMetaclass
