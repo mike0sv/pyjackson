@@ -1,8 +1,8 @@
 from typing import Coroutine, Dict, List, Set, Tuple, Union
 
-from pyjackson._typing_utils import (get_collection_type, get_generic_origin, is_collection, is_generic,
-                                     is_generic_or_union, is_mapping, is_tuple, is_union, resolve_forward_ref,
-                                     resolve_inner_forward_refs)
+from pyjackson._typing_utils import (get_collection_type, get_generic_origin, get_type_name_repr, is_collection,
+                                     is_generic, is_generic_or_union, is_mapping, is_tuple, is_union,
+                                     resolve_forward_ref, resolve_inner_forward_refs)
 
 
 def test_is_generic():
@@ -106,3 +106,13 @@ def test_get_generic_origin():
     assert get_generic_origin(Dict[str, str]) == Dict
     assert get_generic_origin(Tuple[str]) == Tuple
     assert get_generic_origin(Union[str, int]) == Union
+
+
+def test_get_type_name_repr():
+    assert get_type_name_repr('str') == 'str'
+    assert get_type_name_repr(str) == 'str'
+    assert get_type_name_repr(List[str]) == 'List[str]'
+    assert get_type_name_repr(List[List[str]]) == 'List[List[str]]'
+    assert get_type_name_repr(Union[str, int]) == 'Union[str, int]'
+    assert get_type_name_repr(Union[str, List[str]]) == 'Union[str, List[str]]'
+    assert get_type_name_repr(List[Union[str, int]]) == 'List[Union[str, int]]'

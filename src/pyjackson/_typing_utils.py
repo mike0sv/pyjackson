@@ -39,6 +39,23 @@ def is_generic_or_union(cls):
     return is_generic(cls) or is_union(cls)
 
 
+def get_type_name_repr(cls):
+    if is_generic(cls):
+        typename = getattr(cls, '_name', str(cls.__origin__))
+        if typename.startswith('typing.'):
+            typename = typename[len('typing.'):]
+        return f'{typename}[{", ".join(get_type_name_repr(c) for c in cls.__args__)}]'
+    elif is_union(cls):
+        typename = str(cls.__origin__)
+        if typename.startswith('typing.'):
+            typename = typename[len('typing.'):]
+        return f'{typename}[{", ".join(get_type_name_repr(c) for c in cls.__args__)}]'
+    elif isinstance(cls, str):
+        return cls
+    else:
+        return getattr(cls, '__name__', str(cls))
+
+
 __all__ = [
     'resolve_inner_forward_refs',
     'is_collection',
@@ -48,5 +65,6 @@ __all__ = [
     'resolve_forward_ref',
     'is_tuple',
     'get_generic_origin',
-    'is_generic_or_union'
+    'is_generic_or_union',
+    'get_type_name_repr'
 ]

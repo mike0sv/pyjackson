@@ -51,9 +51,11 @@ class Field(Comparable):
         self.default = default
 
     def __str__(self):
+        from pyjackson._typing_utils import get_type_name_repr
+        type_name = get_type_name_repr(self.type)
         if self.has_default:
-            return f'{self.name}: {self.type.__name__} = {self.default}'
-        return f'{self.name}: {self.type.__name__}'
+            return f'{self.name}: {type_name} = {self.default}'
+        return f'{self.name}: {type_name}'
 
     def __repr__(self):
         return str(self)

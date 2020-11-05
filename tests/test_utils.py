@@ -96,6 +96,17 @@ def test_get_class_fields():
     assert fields == [Field('field1', str, False), Field('field2', int, True, 0)]
 
 
+def test_field_repr():
+    class AClass:
+        def __init__(self, field1: str, field2: Union[str, int], field3: List[str] = []): pass
+
+    f1, f2, f3 = get_class_fields(AClass)
+
+    assert str(f1) == 'field1: str'
+    assert str(f2) == 'field2: Union[str, int]'
+    assert str(f3) == 'field3: List[str] = []'
+
+
 def test_get_mapping_types():
     assert get_mapping_types(Dict[str, int]) == (str, int)
     assert get_mapping_types(Dict[str, List[str]]) == (str, List[str])

@@ -61,3 +61,4 @@ def test_type_filed__metadata():
     assert decorated.__name__ == RootClass.__name__
     assert decorated.__doc__ == RootClass.__doc__
     assert decorated.__qualname__ == RootClass.__qualname__
+    assert f'{decorated.__module__}.{decorated.__name__}' in decorated._subtypes
