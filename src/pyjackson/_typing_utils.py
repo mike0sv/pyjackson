@@ -32,7 +32,18 @@ elif _minor <= 8:
                                   get_generic_origin37 as get_generic_origin)
 
 else:
-    warnings.warn('Pyjackson was not tested for python version > 3.8')
+    from ._typing_utils37 import (is_union37 as is_union,
+                                  get_collection_type37 as get_collection_type,
+                                  get_generic_origin37 as get_generic_origin)
+    from ._typing_utils39 import (is_collection39 as is_collection,
+                                  is_generic39 as is_generic,
+                                  is_mapping39 as is_mapping,
+                                  resolve_forward_ref39 as resolve_forward_ref,
+                                  resolve_inner_forward_refs39 as resolve_inner_forward_refs,
+                                  is_tuple39 as is_tuple,)
+
+    if _minor > 9:
+        warnings.warn('Pyjackson was not tested for python version > 3.9')
 
 
 def is_generic_or_union(cls):
