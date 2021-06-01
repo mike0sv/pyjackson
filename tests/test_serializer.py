@@ -168,23 +168,25 @@ def test_parametrized_property():
 _python_version = sys.version_info[:2]
 
 
-def relations():
-    def eq(x, y):
-        return x == y
+def eq(x, y):
+    return x == y
 
-    def type_eq(x, y):
-        return type(x) == type(y)
 
-    def is_rel(x, y):
-        return x is y
+def type_eq(x, y):
+    return type(x) == type(y)
 
-    return [
-        eq,
-        isinstance,
-        issubclass,
-        type_eq,
-        is_rel
-    ]
+
+def is_rel(x, y):
+    return x is y
+
+
+RELATIONS = [
+    eq,
+    isinstance,
+    issubclass,
+    type_eq,
+    is_rel
+]
 
 
 def create_object_quads():
@@ -200,13 +202,15 @@ def create_object_quads():
         (issubclass, SizedTestType, CClass),  # cant hack TestClass to throw TypeError on subclass check
         (issubclass, SizedTestType(2), CClass),
     ]
-    skipping = {(3, 7): skip_python37, (3, 8): skip_python37}
+    skipping = {(3, 7): skip_python37, (3, 8): skip_python37, (3, 9): skip_python37 + [
+        (type_eq, SizedTestType, SizedTestType(2))  # now those are different types
+    ]}
 
     args = []
 
     for (r1, o1), (r2, o2) in itertools.combinations(pairs, 2):
 
-        for relation in relations():
+        for relation in RELATIONS:
             args.append([relation,
                          o1, o2, r1, r2,
                          (relation, o1, o2) in skipping.get(_python_version, [])])
